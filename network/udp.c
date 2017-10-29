@@ -14,9 +14,11 @@ int qDatagramSocket_receive(qSocket sock,char* srcaddr,char* buffer,unsigned int
     memset(&srcaddr_in,0,sizeof(srcaddr_in));
     socklen_t addrsz = sizeof(srcaddr_in);
     int actrlen = recvfrom(sock.desc,buffer,size,flags,(struct sockaddr*)&srcaddr_in,&addrsz);
-    memset(srcaddr,0,26);
-    strcpy(srcaddr,inet_ntoa(srcaddr_in.sin_addr));
-    sprintf(srcaddr+strlen(inet_ntoa(srcaddr_in.sin_addr)),":%d",ntohs(srcaddr_in.sin_port));
+    if(srcaddr != NULL){
+        memset(srcaddr,0,26);
+        strcpy(srcaddr,inet_ntoa(srcaddr_in.sin_addr));
+        sprintf(srcaddr+strlen(inet_ntoa(srcaddr_in.sin_addr)),":%d",ntohs(srcaddr_in.sin_port));
+    }
     return actrlen;
 }
 
