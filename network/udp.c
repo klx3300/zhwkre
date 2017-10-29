@@ -23,7 +23,7 @@ int qDatagramSocket_receive(qSocket sock,char* srcaddr,char* buffer,unsigned int
 }
 
 int qDatagramSocket_send(qSocket sock,const char* dest,const char* payload,unsigned int size,int flags){
-    if(sock.domain == AF_INET){
+    if(sock.domain != AF_INET){
         return -1;
     }
     int separator_pos = find_byte(dest,':',strlen(dest));
