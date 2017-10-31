@@ -44,7 +44,7 @@ qSocket qStreamSocket_accept(qSocket sock,char* srcaddr);
 //void qStreamSocket__sendbeat(qSocket sock);
 //void qStreamSocket__acceptbeat(qSocket sock);
 #define qStreamSocket_setQuickAck(sock,qack) qStreamSocket__setQuickAck(&sock,qack)
-void qStreamSocket__setQuickAck(qSocket *sock,int quickack);
+int qStreamSocket__setQuickAck(qSocket *sock,int quickack);
 int qStreamSocket_write(qSocket sock,const char* content,unsigned int length);
 int qStreamSocket_read(qSocket sock,char* buffer,unsigned int limitation);
 int qStreamSocket_readchar(qSocket sock,char* c);
