@@ -18,5 +18,8 @@ extern int zhwk_error;
 #define ZHWK_ERR_TCP_ACCEPT_FAIL 42
 #define ZHWK_ERR_TCP_READ_FAIL 43
 #define ZHWK_ERR_TCP_RECV_FAIL 44
+#define ZHWK_ERR_TCP_WRITE_FAIL 45
+#define ZHWK_ERR_UDP_RECV_FAIL 50
+#define ZHWK_ERR_UDP_SEND_FAIL 51
 
 #endif

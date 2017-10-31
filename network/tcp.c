@@ -77,6 +77,7 @@ int qStreamSocket__setQuickAck(qSocket *sock,int qack){
 
 int qStreamSocket_write(qSocket sock,const char* content,unsigned int size){
     int written=write(sock.desc,content,size);
+    if(written==-1) SETERR(ZHWK_ERR_TCP_WRITE_FAIL);
     return written;
 }
 int qStreamSocket_read(qSocket sock,char* buffer,unsigned int buffer_size){

@@ -1,5 +1,6 @@
 #include "../network.h"
 #include "../utils.h"
+#include "../error.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -7,6 +8,7 @@
 
 int qDatagramSocket_receive(qSocket sock,char* srcaddr,char* buffer,unsigned int size,int flags){
     if(sock.domain != AF_INET){
+        SETERR(ZHWK_ERR_SOCK_ADDR_INVAL);
         return -1;
     }
     memset(buffer,0,size);
@@ -19,11 +21,13 @@ int qDatagramSocket_receive(qSocket sock,char* srcaddr,char* buffer,unsigned int
         strcpy(srcaddr,inet_ntoa(srcaddr_in.sin_addr));
         sprintf(srcaddr+strlen(inet_ntoa(srcaddr_in.sin_addr)),":%d",ntohs(srcaddr_in.sin_port));
     }
+    if(actrlen == -1) SETERR(ZHWK_ERR_UDP_RECV_FAIL);
     return actrlen;
 }
 
 int qDatagramSocket_send(qSocket sock,const char* dest,const char* payload,unsigned int size,int flags){
     if(sock.domain != AF_INET){
+        SETERR(ZHWK_ERR_SOCK_ADDR_INVAL);
         return -1;
     }
     int separator_pos = find_byte(dest,':',strlen(dest));
@@ -34,5 +38,6 @@ int qDatagramSocket_send(qSocket sock,const char* dest,const char* payload,unsig
     sscanf(dest+separator_pos+1,"%hd",&tmpport);
     dest_addr.sin_port = htons(tmpport);
     int sentlen = sendto(sock.desc,payload,size,flags,(struct sockaddr*)&dest_addr,sizeof(struct sockaddr_in));
+    if(sentlen == -1) SETERR(ZHWK_ERR_UDP_SEND_FAIL);
     return sentlen;
 }
