@@ -1,10 +1,12 @@
 #include "../bss.h"
+#include "../error.h"
 #include <stdlib.h>
 #include <string.h>
 
 binary_safe_string qbss_new(){
     binary_safe_string bss;
     bss.str = malloc(64);
+    if(bss.str == NULL) SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
     bss.size = 0;
     bss.capacity = 64;
     memset(bss.str,0,64);

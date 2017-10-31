@@ -7,6 +7,7 @@ extern int zhwk_error;
 #define SETERR(x) (zhwk_error = (x))
 
 // errors
+#define ZHWK_ERR_MM_ALLOC_FAIL 20
 #define ZHWK_ERR_SOCK_DOMAIN_INVAL 30
 #define ZHWK_ERR_SOCK_ADDR_INVAL 31
 #define ZHWK_ERR_SOCK_FD_OPEN_FAIL 32
@@ -21,5 +22,12 @@ extern int zhwk_error;
 #define ZHWK_ERR_TCP_WRITE_FAIL 45
 #define ZHWK_ERR_UDP_RECV_FAIL 50
 #define ZHWK_ERR_UDP_SEND_FAIL 51
+#define ZHWK_ERR_MUTEX_INIT_FAIL 60
+#define ZHWK_ERR_MUTEX_LOCK_FAIL 61
+#define ZHWK_ERR_MUTEX_RELEASE_FAIL 62
+#define ZHWK_ERR_MUTEX_DESTROY_FAIL 63
+#define ZHWK_ERR_THREAD_CREATE_FAIL 70
+#define ZHWK_ERR_THREAD_DETACH_FAIL 71
+#define ZHWK_ERR_THREAD_JOIN_FAIL 72
 
 #endif
