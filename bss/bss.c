@@ -3,10 +3,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-binary_safe_string qbss_new(){
+binary_safe_string qbss_constructor(){
     binary_safe_string bss;
     bss.str = malloc(64);
-    if(bss.str == NULL) SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
+    if(bss.str == NULL){
+        SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
+        return bss;
+    }
     bss.size = 0;
     bss.capacity = 64;
     memset(bss.str,0,64);
@@ -18,6 +21,10 @@ void q__bss_append(binary_safe_string* bss,char* str,unsigned int len){
     while(bss->capacity<2*(bss->size+len)){
         // realloc
         char* tmp = malloc(2*(bss->capacity));
+        if(tmp == NULL){
+            SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
+            return;
+        }
         memset(tmp,0,2*(bss->capacity));
         memcpy(tmp,bss->str,bss->size);
         bss->capacity = bss->capacity * 2;
