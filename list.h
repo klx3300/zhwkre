@@ -21,22 +21,24 @@
 #define qList_initdesc(desc) q__List_initdesc(&(desc))
 void q__List_initdesc(void* descriptor);
 
+qListDescriptor qList_constructor();
+
 #define qList_push_back(desc,target) q__List_push_back(&(desc),&(target),sizeof(target))
-void q__List_push_back(void* descriptor,void* target,unsigned int target_size);
+int q__List_push_back(void* descriptor,void* target,unsigned int target_size);
 #define qList_push_front(desc,target) q__List_push_front(&(desc),&(target),sizeof(target))
-void q__List_push_front(void* descriptor,void* target,unsigned int target_size);
+int q__List_push_front(void* descriptor,void* target,unsigned int target_size);
 #define qList_pop_back(desc) q__List_pop_back(&(desc))
-void q__List_pop_back(void* descriptor);
+int q__List_pop_back(void* descriptor);
 #define qList_pop_front(desc) q__List_pop_front(&(desc))
-void q__List_pop_front(void* descriptor);
+int q__List_pop_front(void* descriptor);
 #define qList_erase_elem(desc,iter) q__List_erase_elem(&(desc),iter)
-void q__List_erase_elem(void* descriptor,qListIterator iter);
+int q__List_erase_elem(void* descriptor,qListIterator iter);
 #define qList_swap_elem(desc,itera,iterb) q__List_swap_elem(&(desc),itera,iterb)
-void q__List_swap_elem(void* descriptor,qListIterator itera,qListIterator iterb);
+int q__List_swap_elem(void* descriptor,qListIterator itera,qListIterator iterb);
 // notice: unlike cpp behaivor, the destructor here plays the role of
 // clear the whole list and set the necessary parameters to its starting status.
 #define qList_destructor(desc) q__List_destructor(&desc)
-void q__List_destructor(void* descriptor);
+int q__List_destructor(void* descriptor);
 
 #define qList_foreach(desc,itername) for(qListIterator itername=(desc).head;itername != NULL;itername = itername->next)
 

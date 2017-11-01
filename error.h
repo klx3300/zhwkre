@@ -7,6 +7,7 @@ extern int zhwk_error;
 #define SETERR(x) (zhwk_error = (x))
 
 // errors
+#define ZHWK_ERR_LIST_EMPTY 10
 #define ZHWK_ERR_MM_ALLOC_FAIL 20
 #define ZHWK_ERR_SOCK_DOMAIN_INVAL 30
 #define ZHWK_ERR_SOCK_ADDR_INVAL 31
