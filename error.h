@@ -31,4 +31,7 @@ extern int zhwk_error;
 #define ZHWK_ERR_THREAD_DETACH_FAIL 71
 #define ZHWK_ERR_THREAD_JOIN_FAIL 72
 
+int chkerr(void);
+void fatalerr(void);
+
 #endif
