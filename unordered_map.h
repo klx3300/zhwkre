@@ -28,11 +28,11 @@ qMapData q__MapData_constructor(void* key,void* value,unsigned int keysize,unsig
 unsigned int qMap_size(qMap st);
 
 #define qMap_clear(map) q__Map_clear(&(map))
-void q__Map_clear(qMap* st);
+int q__Map_clear(qMap* st);
 #define qMap_insert(map,key,value,hashf) q__Map_insert(&(map),&(key),&(value),sizeof(key),sizeof(value),hashf)
-void q__Map_insert(qMap* st, void* key, void* value,unsigned int keysize,unsigned int valuesize,qHashFuncProto hashf);
+int q__Map_insert(qMap* st, void* key, void* value,unsigned int keysize,unsigned int valuesize,qHashFuncProto hashf);
 #define qMap_erase(map,key,hashf) q__Map_erase(&(map),&(key),sizeof(key),hashf)
-void q__Map_erase(qMap* st, void* key, unsigned int keysize,qHashFuncProto hashf);
+int q__Map_erase(qMap* st, void* key, unsigned int keysize,qHashFuncProto hashf);
 
 // return NULL if not found
 // otherwise return pointer to value
