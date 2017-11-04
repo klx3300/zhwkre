@@ -46,7 +46,8 @@ typedef struct q__btree_desc_st qBTreeDescriptor;
 
 qBTreeDescriptor qBTree_constructor(int (*comp)(void*,unsigned int,void*,unsigned int));
 
-int qBTree_ptr_at(qBTreeDescriptor desc,qBTreeIterator* iter,void* key,unsigned int keysize);
+#define qBTree_ptr_at(desc,iter,k) qBTree__ptr_at(desc,&(iter),&(k),sizeof(k))
+int qBTree__ptr_at(qBTreeDescriptor desc,qBTreeIterator* iter,void* key,unsigned int keysize);
 
 #define qBTree_insert(desc,k,v) qBTree__insert(&(desc),&(k),sizeof(k),&(v),sizeof(v))
 int qBTree__insert(qBTreeDescriptor* desc,void* key,unsigned int keysize,void* value,unsigned int valuesize);

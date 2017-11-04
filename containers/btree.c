@@ -1,5 +1,6 @@
 #include "../btree.h"
 #include "../error.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -33,6 +34,8 @@ qPair qBTreeNode__split_up(qBTreeDescriptor desc,qBTreeNode* nodesplit,qBTreeNod
         toprochild->childs[1]=nodesplit->childs[0];
         nodesplit->kv[0]=nodesplit->kv[1];
         ZEROINIT(nodesplit->kv[1]);
+        ZEROINIT(nodesplit->extrakv);
+        nodesplit->extrachild = NULL;
         nodesplit->childs[0]=nodesplit->childs[1];
         nodesplit->childs[1]=nodesplit->childs[2];
         nodesplit->childs[2]=NULL;
@@ -45,8 +48,10 @@ qPair qBTreeNode__split_up(qBTreeDescriptor desc,qBTreeNode* nodesplit,qBTreeNod
         toprochild->kv[0]=nodesplit->kv[0];
         nodesplit->kv[0]=nodesplit->kv[1];
         ZEROINIT(nodesplit->kv[1]);
+        ZEROINIT(nodesplit->extrakv);
         toprochild->childs[0]=nodesplit->childs[0];
         toprochild->childs[1]=nodesplit->extrachild;
+        nodesplit->extrachild = NULL;
         nodesplit->childs[0]=nodesplit->childs[1];
         nodesplit->childs[1]=nodesplit->childs[2];
         nodesplit->childs[2]=NULL;
@@ -57,9 +62,11 @@ qPair qBTreeNode__split_up(qBTreeDescriptor desc,qBTreeNode* nodesplit,qBTreeNod
         toprochild->kv[0]=nodesplit->kv[0];
         nodesplit->kv[0]=nodesplit->extrakv;
         ZEROINIT(nodesplit->kv[1]);
+        ZEROINIT(nodesplit->extrakv);
         toprochild->childs[0]=nodesplit->childs[0];
         toprochild->childs[1]=nodesplit->childs[1];
         nodesplit->childs[0]=nodesplit->extrachild;
+        nodesplit->extrachild = NULL;
         nodesplit->childs[1]=nodesplit->childs[2];
         nodesplit->childs[2]=NULL;
         return topropair;
@@ -96,6 +103,12 @@ int qBTree__recursive_search(qBTreeDescriptor desc,qBTreeNode* root,qBTreeIterat
         return qBTree__recursive_search(desc,root->childs[0],lastit,key,keysize);
     }
     if(root->kv[1].key == NULL){
+        if(root->childs[1] != NULL){
+            lastit->track[lastit->top].parent = root;
+            lastit->track[lastit->top].childno = 1;
+            lastit->top ++;
+            return qBTree__recursive_search(desc,root->childs[1],lastit,key,keysize);
+        }
         ZEROINIT(*lastit);
         return -1; // not found
     }
@@ -106,7 +119,7 @@ int qBTree__recursive_search(qBTreeDescriptor desc,qBTreeNode* root,qBTreeIterat
         lastit->which = 1;
         return 0;
     }
-    if(first_cmp < 0){
+    if(second_cmp < 0){
         lastit->track[lastit->top].parent = root;
         lastit->track[lastit->top].childno = 1;
         lastit->top++;
@@ -118,7 +131,7 @@ int qBTree__recursive_search(qBTreeDescriptor desc,qBTreeNode* root,qBTreeIterat
     return qBTree__recursive_search(desc,root->childs[2],lastit,key,keysize);
 }
 
-int qBTree_ptr_at(qBTreeDescriptor desc,qBTreeIterator* iter,void* key,unsigned int keysize){
+int qBTree__ptr_at(qBTreeDescriptor desc,qBTreeIterator* iter,void* key,unsigned int keysize){
     ZEROINIT(*iter);
     return qBTree__recursive_search(desc,desc.root,iter,key,keysize);
 }
@@ -169,7 +182,7 @@ int qBTree__recursive_insert(qBTreeDescriptor* desc,qBTreeNode** root,qPair pair
         }
         qBTreeNode* topronode = qBTreeNode__constructor();
         qPair topropair = qBTreeNode__split_up(*desc,deref(root)->childs[0],topronode);
-        if(deref(root)->childs[1] != NULL){
+        if(deref(root)->kv[1].key != NULL){
             deref(root)->extrakv = topropair;
             deref(root)->extrachild = topronode;
             return 1;
@@ -191,7 +204,7 @@ int qBTree__recursive_insert(qBTreeDescriptor* desc,qBTreeNode** root,qPair pair
             }
             qBTreeNode* topronode = qBTreeNode__constructor();
             qPair topropair = qBTreeNode__split_up(*desc,deref(root)->childs[1],topronode);
-            if(deref(root)->childs[1] != NULL){
+            if(deref(root)->kv[1].key != NULL){
                 deref(root)->extrakv = topropair;
                 deref(root)->extrachild = topronode;
                 return 1;
@@ -267,8 +280,16 @@ int qBTree__rotate_left(qBTreeDescriptor* desc, qBTreeNode* root,int which){
         // right sibling not exist or don't have spare pair
         return -1;
     }
-    root->childs[which]->kv[0] = root->childs[which+1]->kv[1];
+    int root_mid = which;
+    root->childs[which]->kv[0] = root->kv[root_mid];
+    root->kv[root_mid] = root->childs[which+1]->kv[0];
+    root->childs[which]->childs[1] = root->childs[which+1]->childs[0];
+    root->childs[which+1]->childs[0]=NULL;
+    root->childs[which+1]->kv[0]=root->childs[which+1]->kv[1];
     ZEROINIT(root->childs[which+1]->kv[1]);
+    root->childs[which+1]->childs[0]=root->childs[which+1]->childs[1];
+    root->childs[which+1]->childs[1]=root->childs[which+1]->childs[2];
+    root->childs[which+1]->childs[2]=NULL;
     return 0;
 }
 int qBTree__rotate_right(qBTreeDescriptor* desc, qBTreeNode* root,int which){
@@ -279,7 +300,12 @@ int qBTree__rotate_right(qBTreeDescriptor* desc, qBTreeNode* root,int which){
         // right sibling not exist or don't have spare pair
         return -1;
     }
-    root->childs[which]->kv[0] = root->childs[which-1]->kv[1];
+    int root_mid = which-1;
+    root->childs[which]->kv[0]=root->kv[root_mid];
+    root->kv[root_mid]=root->childs[which-1]->kv[1];
+    root->childs[which]->childs[1]=root->childs[which]->childs[0];
+    root->childs[which]->childs[0]=root->childs[which-1]->childs[2];
+    root->childs[which-1]->childs[2] = NULL;
     ZEROINIT(root->childs[which-1]->kv[1]);
     return 0;
 }
@@ -309,7 +335,8 @@ int qBTree__merge(qBTreeDescriptor* desc,qBTreeNode* root,int which){
                 root->childs[0]->childs[2] = root->childs[1]->childs[0];
             }
             free(root->childs[1]);
-            root->childs[1] = NULL;
+            root->childs[1] = root->childs[2];
+            root->childs[2] = NULL;
             if(root->kv[0].key == NULL){
                 return 1;
             }
@@ -367,7 +394,7 @@ int qBTree__recursive_erase_min(qBTreeDescriptor* desc,qBTreeNode* root,int FLAG
 
 int qBTree__get_min(qBTreeDescriptor* desc,qBTreeNode* root,qPair* mvpair,int FLAG_FREE_ORIG){
     if(root == NULL) return -1;
-    if(root->childs[0] != NULL) return qBTree__get_min(desc,root,mvpair,FLAG_FREE_ORIG);
+    if(root->childs[0] != NULL) return qBTree__get_min(desc,root->childs[0],mvpair,FLAG_FREE_ORIG);
     if(FLAG_FREE_ORIG){
         free(mvpair->key);
         free(mvpair->value);
@@ -407,11 +434,11 @@ int qBTree__recursive_erase(qBTreeDescriptor* desc,qBTreeNode* root,qPair target
         if(!qBTree__rotate_left(desc,root,0)) return 0;
         return qBTree__merge(desc,root,0);
     }
-    if(root->childs[2] == NULL){
+    if(root->kv[1].key == NULL){
         int status = qBTree__recursive_erase(desc,root->childs[1],target);
         // post work II
         if(status == 0 || status == -1) return status;
-        if(qBTree__rotate_left(desc,root,1) == 0 || qBTree__rotate_right(desc,root,1) == 0){
+        if(qBTree__rotate_right(desc,root,1) == 0){
             return 0;
         }
         return qBTree__merge(desc,root,1);
@@ -427,7 +454,7 @@ int qBTree__recursive_erase(qBTreeDescriptor* desc,qBTreeNode* root,qPair target
             return 0;
         }
         int erasestat = qBTree__recursive_erase_min(desc,root->childs[2],0);
-        if(erasestat == 0 || erasestat == 1){
+        if(erasestat == 0 || erasestat == -1){
             return erasestat;
         }
         if(!qBTree__rotate_right(desc,root,2)) return 0;
@@ -444,7 +471,7 @@ int qBTree__recursive_erase(qBTreeDescriptor* desc,qBTreeNode* root,qPair target
     }
     int status = qBTree__recursive_erase(desc,root->childs[2],target);
     // post work IV
-    if(status == 0 || status == 1) return status;
+    if(status == 0 || status == -1) return status;
     if(!qBTree__rotate_right(desc,root,2)) return 0;
     return qBTree__merge(desc,root,2);
 }
@@ -467,3 +494,10 @@ int qBTree__erase(qBTreeDescriptor* desc,qBTreeIterator elem){
     return 0;
 }
 
+int qBTreeIterator_isvalid(qBTreeIterator i){
+    return i.node != NULL;
+}
+
+qPair qBTreeIterator_deref(qBTreeIterator i){
+    return (i.node->kv[i.which]);
+}
