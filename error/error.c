@@ -10,6 +10,7 @@ int chkerr(void){
         fprintf(stderr,"[D] zhwkerr %d, posix err %d\n",zhwk_error,errno);
         return -1;
     }
+    zhwk_error = 0;
     return 0;
 }
 
@@ -18,4 +19,9 @@ void fatalerr(void){
         fprintf(stderr,"[E] zhwkerr %d, posix err %d\n",zhwk_error,errno);
         exit(-1);
     }
+    zhwk_error = 0;
+}
+
+void clrerr(void){
+    zhwk_error = 0;
 }
