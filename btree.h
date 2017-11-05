@@ -60,6 +60,9 @@ int qBTree__erase(qBTreeDescriptor* desc,qBTreeIterator elem);
 #define qBTree_destructor(desc) qBTree__destructor(&(desc))
 int qBTree__destructor(qBTreeDescriptor* desc);
 
+qBTreeIterator qBTree_begin(qBTreeDescriptor desc);
+qBTreeIterator qBTree_end(qBTreeDescriptor desc);
+
 int qBTreeIterator_isvalid(qBTreeIterator i);
 qPair qBTreeIterator_deref(qBTreeIterator i);
 qBTreeIterator qBTreeIterator_prev(qBTreeIterator i);

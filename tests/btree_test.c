@@ -26,6 +26,10 @@ int main(void){
             exit(1);
         }
     }
+    if(desc.size != TESTNUM){
+        printf("[ERR] Recorded size is %d, expected %d\n",desc.size,TESTNUM);
+        exit(1);
+    }
     printf("[DBG] Testing Correctness..\n");
     for(int i=0;i<TESTNUM;i++){
         //printf("[LOG] Attempt validating %d\n",i);
@@ -44,6 +48,32 @@ int main(void){
             printf("[ERR] Data correctness error: expected %d at %d, get %d.\n",i+1,i,*(int*)(qBTreeIterator_deref(testiter).value));
             exit(1);
         }
+    }
+    printf("[DBG] Testing Iteration/Next ..\n");
+    int curr = 0;
+    for(qBTreeIterator it=qBTree_begin(desc);qBTreeIterator_isvalid(it);it=qBTreeIterator_next(it)){
+        if(*(int*)(qBTreeIterator_deref(it).key) != curr){
+            printf("[ERR] While iterating through, No.%d key isn't %d.\n",*(int*)(qBTreeIterator_deref(it).key),curr);
+            exit(1);
+        }
+        curr++;
+    }
+    if(curr != TESTNUM){
+        printf("[ERR] Only Iterated %d elems, expected %d\n",curr,TESTNUM);
+        exit(1);
+    }
+    printf("[DBG] Testing Iteration/Prev ..\n");
+    curr = TESTNUM-1;
+    for(qBTreeIterator it=qBTree_end(desc);qBTreeIterator_isvalid(it);it=qBTreeIterator_prev(it)){
+        if(*(int*)(qBTreeIterator_deref(it).key) != curr){
+            printf("[ERR] While iterating through, No.%d key isn't %d.\n",*(int*)(qBTreeIterator_deref(it).key),curr);
+            exit(1);
+        }
+        curr--;
+    }
+    if(curr != -1){
+        printf("[ERR] Only Iterated %d elems, expected %d\n",TESTNUM-1-curr,TESTNUM);
+        exit(1);
     }
     printf("[DBG] Testing Erase..\n");
     for(int i=0;i<TESTNUM;i++){
@@ -69,6 +99,10 @@ int main(void){
                 exit(-1);
             }*/
         }
+    }
+    if(desc.size != TESTNUM/2){
+        printf("[ERR] Recorded size is %d, expected %d.\n",desc.size,TESTNUM/2);
+        exit(1);
     }
     printf("[DBG] Testing Correctness..\n");
     for(int i=0;i<TESTNUM;i++){

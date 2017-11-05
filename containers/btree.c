@@ -501,3 +501,111 @@ int qBTreeIterator_isvalid(qBTreeIterator i){
 qPair qBTreeIterator_deref(qBTreeIterator i){
     return (i.node->kv[i.which]);
 }
+
+qBTreeIterator qBTree_begin(qBTreeDescriptor desc){
+    qBTreeIterator it;
+    ZEROINIT(it);
+    it.node = desc.root;
+    if(it.node == NULL)return it;
+    while(it.node->childs[0] != NULL){
+        it.track[it.top].parent = it.node;
+        it.track[it.top].childno = 0;
+        it.top++;
+        it.node = it.node->childs[0];
+        it.which = 0;
+    }
+    return it;
+}
+
+qBTreeIterator qBTree_end(qBTreeDescriptor desc){
+    qBTreeIterator it;
+    ZEROINIT(it);
+    it.node = desc.root;
+    if(it.node == NULL) return it;
+    it.which = it.node->kv[1].key == NULL?0:1;
+    while(it.node->childs[it.which+1] != NULL){
+        it.track[it.top].parent = it.node;
+        it.track[it.top].childno = it.which+1;
+        it.top++;
+        it.node = it.node->childs[it.which+1];
+        it.which = it.node->kv[1].key == NULL?0:1;
+    }
+    return it;
+}
+
+qBTreeIterator qBTreeIterator_prev(qBTreeIterator it){
+    qBTreeIterator prev = it;
+    if(prev.node->childs[prev.which] == NULL){
+        // next layer lesser not exist
+        if(prev.which == 1){
+            // same layer lesser exists
+            prev.which=0;
+            return prev;
+        }
+        while(prev.top != 0 && prev.track[prev.top-1].childno == 0) prev.top--;
+        if(prev.top == 0){
+            // previous layer lesser not exist
+            qBTreeIterator rit;
+            ZEROINIT(rit);
+            return rit;
+        }
+        prev.node = prev.track[prev.top-1].parent;
+        prev.which = prev.track[prev.top-1].childno-1;
+        prev.top--;
+        return prev;
+    }
+    // next layer lesser exists
+    prev.track[prev.top].parent = prev.node;
+    prev.track[prev.top].childno = prev.which;
+    prev.top++;
+    prev.node = prev.node->childs[prev.which];
+    prev.which = prev.node->kv[1].key == NULL?0:1;
+    // go rightmost
+    while(prev.node->childs[prev.which+1] != NULL){
+        prev.track[prev.top].parent = prev.node;
+        prev.track[prev.top].childno = prev.which+1;
+        prev.top++;
+        prev.node = prev.node->childs[prev.which+1];
+        prev.which = prev.node->kv[1].key == NULL?0:1;
+    }
+    return prev;
+}
+
+qBTreeIterator qBTreeIterator_next(qBTreeIterator it){
+    qBTreeIterator next = it;
+    if(next.node->childs[next.which+1] == NULL){
+        // next layer larger not exist
+        if(next.which == 0 && next.node->kv[1].key != NULL){
+            // same layer larger exists
+            next.which = 1;
+            return next;
+        }
+        while(next.top != 0 && (next.track[next.top-1].childno == 2 ||
+              next.track[next.top-1].parent->kv[next.track[next.top-1].childno].key==NULL)) next.top--;
+        if(next.top == 0){
+            // previous layer larger not exist
+            qBTreeIterator rit;
+            ZEROINIT(rit);
+            return rit;
+        }
+        next.node = next.track[next.top-1].parent;
+        next.which = next.track[next.top-1].childno;
+        next.top--;
+        return next;
+    }
+    // next layer larger exists
+    next.track[next.top].parent = next.node;
+    next.track[next.top].childno = next.which+1;
+    next.top++;
+    next.node = next.node->childs[next.which+1];
+    next.which = 0;
+    // go leftmost
+    while(next.node->childs[0] != NULL){
+        next.track[next.top].parent = next.node;
+        next.track[next.top].childno = 0;
+        next.top++;
+        next.node = next.node->childs[0];
+        next.which = 0;
+    }
+    return next;
+}
