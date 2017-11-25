@@ -16,6 +16,14 @@ qBinarySafeString qbss_constructor(){
     return bss;
 }
 
+qBinarySafeString qbss__from_array(void* arr,unsigned int size){
+    qBinarySafeString bss = qbss_constructor();
+    if(chkerr()==0){
+        qbss_append(bss,arr,size);
+    }
+    return bss;
+}
+
 void q__bss_append(qBinarySafeString* bss,char* str,unsigned int len){
     // check capacity
     while(bss->capacity<2*(bss->size+len)){

@@ -2,12 +2,14 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include "../log.h"
 
 int zhwk_error;
 
 int chkerr(void){
     if(zhwk_error){
-        fprintf(stderr,"[D] zhwkerr %d, posix err %d\n",zhwk_error,errno);
+        qLogWarnfmt("zhwkerr %d, posix err %s",zhwk_error,strerror(errno));
         return -1;
     }
     zhwk_error = 0;
@@ -16,7 +18,7 @@ int chkerr(void){
 
 void fatalerr(void){
     if(zhwk_error){
-        fprintf(stderr,"[E] zhwkerr %d, posix err %d\n",zhwk_error,errno);
+        qLogFailfmt("zhwkerr %d, posix err %s\n",zhwk_error,strerror(errno));
         exit(-1);
     }
     zhwk_error = 0;
