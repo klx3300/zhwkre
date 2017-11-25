@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-binary_safe_string qbss_constructor(){
-    binary_safe_string bss;
+qBinarySafeString qbss_constructor(){
+    qBinarySafeString bss;
     bss.str = malloc(64);
     if(bss.str == NULL){
         SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
@@ -16,7 +16,7 @@ binary_safe_string qbss_constructor(){
     return bss;
 }
 
-void q__bss_append(binary_safe_string* bss,char* str,unsigned int len){
+void q__bss_append(qBinarySafeString* bss,char* str,unsigned int len){
     // check capacity
     while(bss->capacity<2*(bss->size+len)){
         // realloc
@@ -36,6 +36,6 @@ void q__bss_append(binary_safe_string* bss,char* str,unsigned int len){
     bss->size += len;
 }
 
-void qbss_destructor(binary_safe_string bss){
+void qbss_destructor(qBinarySafeString bss){
     free(bss.str);
 }

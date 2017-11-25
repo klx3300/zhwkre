@@ -6,13 +6,13 @@
 
 #include <string.h>
 
-struct q__ListDescriptor q__list_serialize(struct q__ListDescriptor desc,binary_safe_string prefix){
+struct q__ListDescriptor q__list_serialize(struct q__ListDescriptor desc,qBinarySafeString prefix){
     struct q__ListDescriptor rdesc;
     qList_initdesc(rdesc); // initialize desc
     // construct buffer bss
-    binary_safe_string buffer = qbss_new(); // initialize bss
+    qBinarySafeString buffer = qbss_constructor(); // initialize bss
     qList_push_back(rdesc,buffer); // only copies the pointer value
-    // replacing with qList_push_back(rdesc,qbss_new()) is invalid
+    // replacing with qList_push_back(rdesc,qbss_constructor()) is invalid
     // iterating through the whole list..
     unsigned int counter = 0; // for recording the item number
     qList_foreach(desc,iter){
@@ -33,7 +33,7 @@ struct q__ListDescriptor q__list_serialize(struct q__ListDescriptor desc,binary_
         // so you are really a listdesc,right? okay..maybe i can help you
         struct q__ListDescriptor* idesc = iter->data;
         // construct the next prefix
-        binary_safe_string tmpiprefix = qbss_new();
+        qBinarySafeString tmpiprefix = qbss_constructor();
         qbss_append(tmpiprefix,prefix.str,prefix.size);
         qbss_append(tmpiprefix,(char*)&counter,sizeof(counter));
         struct q__ListDescriptor irdesc = q__list_serialize(*idesc,tmpiprefix);
@@ -48,10 +48,10 @@ struct q__ListDescriptor q__list_serialize(struct q__ListDescriptor desc,binary_
             }
             // if null,create(append)
             if(rdescit == NULL){
-                qList_push_back(rdesc,*((binary_safe_string*)(appiter->data)));
+                qList_push_back(rdesc,*((qBinarySafeString*)(appiter->data)));
             }else{
                 // if not null, bss-append
-                q__bss_append(rdescit->data,((binary_safe_string*)(appiter->data))->str,((binary_safe_string*)(appiter->data))->size);
+                q__bss_append(rdescit->data,((qBinarySafeString*)(appiter->data))->str,((qBinarySafeString*)(appiter->data))->size);
             }
             retcnt++;
         }
@@ -62,11 +62,11 @@ struct q__ListDescriptor q__list_serialize(struct q__ListDescriptor desc,binary_
 
 struct q__ListDescriptor qSerialize(void* data,unsigned int len){
     if(q__List_islist(data,len)){
-        return q__list_serialize(*((struct q__ListDescriptor*)data),qbss_new());
+        return q__list_serialize(*((struct q__ListDescriptor*)data),qbss_constructor());
     }else{
         struct q__ListDescriptor rdesc;
         qList_initdesc(rdesc);
-        binary_safe_string tmpbss = qbss_new();
+        qBinarySafeString tmpbss = qbss_constructor();
         qbss_append(tmpbss,data,len);
         qList_push_back(rdesc,tmpbss);
         return rdesc;
@@ -86,14 +86,14 @@ unsigned int q__uhashf(void* str,unsigned int size){
 
 struct q__ListDescriptor q__list_unserialize(struct q__ListDescriptor dataset,qMap *previous_data){
     // first, read all elements storaged in the last dataset.
-    binary_safe_string* lbss = dataset.tail->data;
+    qBinarySafeString* lbss = dataset.tail->data;
     qMap lists = qMap_constructor(Q_DEFAULT_MAXHASHV);
     qListDescriptor itemslist;
     qList_initdesc(itemslist);
     unsigned int prefix_num = dataset.size - 1;
     for(char* stringiter=lbss->str;
         stringiter != lbss->str+(lbss->size);/*do nothing*/){
-        binary_safe_string tmprefix = qbss_new();
+        qBinarySafeString tmprefix = qbss_constructor();
         if(prefix_num >0){
             // append the prefix
             qbss_append(tmprefix,stringiter,prefix_num*sizeof(unsigned int));
@@ -124,7 +124,7 @@ struct q__ListDescriptor q__list_unserialize(struct q__ListDescriptor dataset,qM
                     }
                 }else{
                     // construct temporary combination
-                    binary_safe_string tmpsearcher = qbss_new();
+                    qBinarySafeString tmpsearcher = qbss_constructor();
                     qbss_append(tmpsearcher,tmprefix.str,tmprefix.size);
                     qbss_append(tmpsearcher,(char*)&tmpcnt,sizeof(tmpcnt));
                     qMapData *tmpmd = q__Map_ptr_at(previous_data,tmpsearcher.str,tmpsearcher.size,q__uhashf);
@@ -183,9 +183,9 @@ void* qUnserialize(struct q__ListDescriptor dataset,int isList){
         *ld = buffer;
         return ld;
     }else{
-        binary_safe_string bss=qbss_new();
-        qbss_append(bss,((binary_safe_string*)(dataset.head->data))->str,
-                    ((binary_safe_string*)(dataset.head->data))->size);
+        qBinarySafeString bss=qbss_constructor();
+        qbss_append(bss,((qBinarySafeString*)(dataset.head->data))->str,
+                    ((qBinarySafeString*)(dataset.head->data))->size);
         return bss.str;
     }
 }

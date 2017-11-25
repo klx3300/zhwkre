@@ -21,7 +21,9 @@
 #define Q_LOG_INFO 10
 #define Q_LOG_DEBUG 0
 
+#ifndef qLog_TIME_FMT_STR
 #define qLog_TIME_FMT_STR "(%.2d/%.2d/%.4d %.2d:%.2d:%.2d) "
+#endif
 
 #define qLogCurrTime() do{time_t rawtv;struct tm* timerep;\
 time(&rawtv);timerep = localtime(&rawtv);\
