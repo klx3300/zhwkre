@@ -5,8 +5,7 @@
 
 struct q__trie_node_st{
     qBinarySafeString value;
-    void* payload;
-    unsigned int payloadsize;
+    qBinarySafeString payload;
     struct q__trie_node_st *parent;
     struct q__trie_node_st *children[256];
 };
