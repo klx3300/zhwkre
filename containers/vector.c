@@ -12,6 +12,7 @@ qVectorDescriptor qVector_constructor(int elemsize){
     if(desc.size == NULL){
         SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
     }
+    *(desc.size) = 0;
     desc.elemstep = elemsize;
     return desc;
 }
@@ -75,7 +76,7 @@ qVectorIterator qVector_end(qVectorDescriptor desc){
 }
 
 int qVectorIterator_isvalid(qVectorIterator iter){
-    return iter.count < *iter.limit && iter.count > 0;
+    return iter.count < *iter.limit && iter.count >= 0;
 }
 
 void* qVectorIterator_deref(qVectorIterator iter){
@@ -86,4 +87,27 @@ qVectorIterator qVectorIterator_move(qVectorIterator iter,int delta){
     qVectorIterator tmpiter = iter;
     tmpiter.count += delta;
     return tmpiter;
+}
+
+int qVector__erase(qVectorDescriptor* desc,qVectorIterator positional){
+    void *buffer = malloc(desc->elemstep);
+    if(buffer == NULL){
+        SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
+        return -1; // zhwkerr not here!
+    }
+    memcpy(buffer,qVectorIterator_deref(positional),desc->elemstep);
+    qVectorIterator i;
+    for(i = positional;
+        qVectorIterator_isvalid(qVectorIterator_move(i,1));
+        i = qVectorIterator_move(i,1)){
+            memcpy(qVectorIterator_deref(i),
+                   qVectorIterator_deref(qVectorIterator_move(i,1)),
+                   desc->elemstep);
+    }
+    memcpy(qVectorIterator_deref(i),buffer,desc->elemstep);
+    return qVector__pop_back(desc);
+}
+
+int qVectorIterator_diff(qVectorIterator a,qVectorIterator b){
+    return a.count - b.count;
 }
