@@ -2,6 +2,10 @@
 #define Q_RE_LIST_H
 
 #include "listd.h"
+#include <stdlib.h>
+
+#define qList_initdesc(desc) q__List_initdesc(&(desc))
+void q__List_initdesc(void* descriptor);
 
 qListDescriptor qList_constructor();
 
@@ -17,24 +21,17 @@ int q__List_pop_front(void* descriptor);
 int q__List_erase_elem(void* descriptor,qListIterator iter);
 #define qList_swap_elem(desc,itera,iterb) q__List_swap_elem(&(desc),itera,iterb)
 int q__List_swap_elem(void* descriptor,qListIterator itera,qListIterator iterb);
-#define qList_islist(desc) q__List_islist(&(desc),sizeof(desc))
-int q__List_islist(void* descriptor,unsigned int size);
-#define qList_copy(desc) q__List_copy(&(desc))
-qListDescriptor q__List_copy(struct q__ListDescriptor *desc);
 // notice: unlike cpp behaivor, the destructor here plays the role of
 // clear the whole list and set the necessary parameters to its starting status.
 #define qList_destructor(desc) q__List_destructor(&desc)
 int q__List_destructor(void* descriptor);
 
-qListIterator qList_begin(qListDescriptor desc);
-qListIterator qList_end(qListDescriptor desc);
+#define qList_foreach(desc,itername) for(qListIterator itername=(desc).head;itername != NULL;itername = itername->next)
 
-qListIterator qListIterator_prev(qListIterator iter);
-qListIterator qListIterator_next(qListIterator iter);
+#define qList_islist(desc) q__List_islist(&(desc),sizeof(desc))
+int q__List_islist(void* descriptor,unsigned int size);
 
-int qListIterator_isvalid(qListIterator iter);
-void* qListIterator_deref(qListIterator iter);
-
-#define qList_foreach(desc,iter) for(qListIterator (iter)=qList_begin(desc);qListIterator_isvalid(iter);(iter)=qListIterator_next(iter))
+#define qList_copy(desc) q__List_copy(&(desc))
+qListDescriptor q__List_copy(struct q__ListDescriptor *desc);
 
 #endif

@@ -14,18 +14,18 @@ qListIterator q__List_new(){
     return tmp;
 }
 
-qListDescriptor qList_constructor(){
-    qListDescriptor desc;
-    qList_initdesc(desc);
-    return desc;
-}
-
 void q__List_initdesc(void* desc){
     struct q__ListDescriptor *ld = (qListDescriptor*)desc;
     memcpy(ld->ldmagic,Q__LD_MAGIC,10);
     ld->head = NULL;
     ld->tail = NULL;
     ld->size = 0;
+}
+
+qListDescriptor qList_constructor(){
+    qListDescriptor desc;
+    q__List_initdesc(&desc);
+    return desc;
 }
 
 int q__List_push_back(void* descriptor,void* target,unsigned int size){
@@ -194,10 +194,32 @@ int q__List_islist(void* descriptor,unsigned int size){
 }
 
 qListDescriptor q__List_copy(struct q__ListDescriptor *desc){
-    qListDescriptor rdesc;
-    qList_initdesc(rdesc);
+    qListDescriptor rdesc=qList_constructor();
     qList_foreach(*desc,iter){
         q__List_push_back(&rdesc,iter->data,iter->size);
     }
     return rdesc;
+}
+
+qListIterator qList_begin(qListDescriptor desc){
+    return desc.head;
+}
+qListIterator qList_end(qListDescriptor desc){
+    return desc.tail;
+}
+
+qListIterator qListIterator_prev(qListIterator iter){
+    return iter->prev;
+}
+
+qListIterator qListIterator_next(qListIterator iter){
+    return iter->next;
+}
+
+int qListIterator_isvalid(qListIterator iter){
+    return iter!=NULL;
+}
+
+void* qListIterator_deref(qListIterator iter){
+    return iter->data;
 }
