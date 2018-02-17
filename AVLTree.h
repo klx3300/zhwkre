@@ -28,7 +28,7 @@ typedef struct q__avltree_desc_st qAVLTreeDescriptor;
 qAVLTreeDescriptor qAVLTree_constructor(int (*comp)(void*,unsigned int,void*,unsigned int));
 
 #define qAVLTree_ptr_at(desc,iter,k) qAVLTree__ptr_at(desc,&(iter),&(k),sizeof(k))
-int qAVLTree__ptr_at(qAVLTreeDescriptor desc,qAVLTreeIterator *iter,void* elem,void* elemlen);
+int qAVLTree__ptr_at(qAVLTreeDescriptor desc,qAVLTreeIterator *iter,void* elem,unsigned int elemlen);
 
 #define qAVLTree_insert(desc,elem) qAVLTree__insert(&(desc),&(elem),sizeof(elem))
 int qAVLTree__insert(qAVLTreeDescriptor *desc,void* elem,unsigned int elemsize);

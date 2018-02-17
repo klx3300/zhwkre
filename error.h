@@ -32,6 +32,7 @@ extern int zhwk_error;
 #define ZHWK_ERR_THREAD_JOIN_FAIL 72
 #define ZHWK_ERR_TREE_ELEM_EXIST 80
 #define ZHWK_ERR_TREE_ELEM_NOTEXIST 81
+#define ZHWK_ERR_TREE_INVALID_OPERATION 82
 
 int chkerr(void);
 void fatalerr(void);
