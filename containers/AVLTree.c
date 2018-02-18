@@ -62,6 +62,9 @@ qAVLTreeNode* qAVLTree__SimpleLeftRotate(qAVLTreeNode* root){
     qAVLTreeNode *rrchild = (root->rchild);
     root->rchild = rrchild->lchild;
     rrchild->lchild = root;
+    // update blfactor accordingly
+    rrchild->blfactor = rrchild->blfactor-1;
+    root->blfactor = root->blfactor-1;
     return rrchild;
 }
 
@@ -73,6 +76,8 @@ qAVLTreeNode* qAVLTree__SimpleRightRotate(qAVLTreeNode* root){
     qAVLTreeNode *rlchild = (root->lchild);
     root->lchild = rlchild->rchild;
     rlchild->rchild = root;
+    rlchild->blfactor=rlchild->blfactor+1;
+    root->blfactor=root->blfactor+1;
     return rlchild;
 }
 
@@ -150,12 +155,21 @@ int qAVLTree__recursive_insert(qAVLTreeDescriptor desc,qAVLTreeNode* root,void* 
             // complete insertion
             qAVLTree__list_insert_left(root,cpdata);
             root->lchild = cpdata;
+            // update balance factor
+            root->blfactor=root->blfactor-1;
             return 0;
         }
         int insresult = qAVLTree__recursive_insert(desc,root->lchild,elem,size);
         if(insresult == -1){
             return -1;
         }
+        // then the insertion is succeeded.
+        // update blfactor
+        root->blfactor=root->blfactor-1;
+        if(root->blfactor <= -1){
+            // trigger rotation
+        }
+        return 1;
     }else{
 
     }
