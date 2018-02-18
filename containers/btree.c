@@ -156,7 +156,6 @@ int qBTree__recursive_insert(qBTreeDescriptor* desc,qBTreeNode** root,qPair pair
         // not full yet
         int firstcmp = desc->comp(pair.key,pair.keysize,deref(root)->kv[0].key,deref(root)->kv[0].keysize);
         if(firstcmp == 0){
-            SETERR(ZHWK_ERR_TREE_ELEM_EXIST);
             return -1;
         }
         if(firstcmp > 0){
@@ -172,7 +171,6 @@ int qBTree__recursive_insert(qBTreeDescriptor* desc,qBTreeNode** root,qPair pair
     int issp = 0;
     int firstcmp = desc->comp(pair.key,pair.keysize,deref(root)->kv[0].key,deref(root)->kv[0].keysize);
     if(firstcmp == 0){
-        SETERR(ZHWK_ERR_TREE_ELEM_EXIST);
         return -1;
     }
     if(firstcmp < 0){
@@ -216,7 +214,6 @@ int qBTree__recursive_insert(qBTreeDescriptor* desc,qBTreeNode** root,qPair pair
             }
         }
         if(secondcmp == 0){
-            SETERR(ZHWK_ERR_TREE_ELEM_EXIST);
             return -1;
         }else{
             issp = qBTree__recursive_insert(desc,&(deref(root)->childs[2]),pair);
@@ -405,7 +402,6 @@ int qBTree__get_min(qBTreeDescriptor* desc,qBTreeNode* root,qPair* mvpair,int FL
 
 int qBTree__recursive_erase(qBTreeDescriptor* desc,qBTreeNode* root,qPair target){
     if(root == NULL){
-        SETERR(ZHWK_ERR_TREE_ELEM_NOTEXIST);
         return -1;
     }
     int firstcmp = desc->comp(target.key,target.keysize,root->kv[0].key,root->kv[0].keysize);
