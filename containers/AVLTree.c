@@ -416,7 +416,7 @@ int qAVLTree__recursive_delete(qAVLTreeDescriptor desc,qAVLTreeNode* root,qAVLTr
     }
 }
 
-int qAVLTree__delete(qAVLTreeDescriptor *desc,qAVLTreeIterator elem){
+int qAVLTree__erase(qAVLTreeDescriptor *desc,qAVLTreeIterator elem){
     if(desc->size == 0) return -1;
     qAVLTreeNode* newroot = NULL;
     int status = qAVLTree__recursive_delete(*desc,desc->root,elem,&newroot,DELETE_OPER_FIND);

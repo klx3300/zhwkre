@@ -33,8 +33,8 @@ int qAVLTree__ptr_at(qAVLTreeDescriptor desc,qAVLTreeIterator *iter,void* elem,u
 #define qAVLTree_insert(desc,elem) qAVLTree__insert(&(desc),&(elem),sizeof(elem))
 int qAVLTree__insert(qAVLTreeDescriptor *desc,void* elem,unsigned int elemsize);
 
-#define qAVLTree_delete(desc,iter) qAVLTree__delete(&(desc),iter)
-int qAVLTree__delete(qAVLTreeDescriptor *desc,qAVLTreeIterator elem);
+#define qAVLTree_erase(desc,iter) qAVLTree__erase(&(desc),iter)
+int qAVLTree__erase(qAVLTreeDescriptor *desc,qAVLTreeIterator elem);
 
 #define qAVLTree_destructor(desc) qAVLTree__destructor(&(desc))
 int qAVLTree__destructor(qAVLTreeDescriptor *desc);
