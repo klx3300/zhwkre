@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "../error.h"
 
-#define TESTNUM 10000000
+#define TESTNUM 10
 
 int int_comparator(void* a,unsigned int asize,void* b,unsigned int bsize){
     if(asize != 4 || bsize != 4){
@@ -77,7 +77,6 @@ int main(void){
     printf("[DBG] Testing Erase..\n");
     for(int i=0;i<TESTNUM;i++){
         if(i%2){
-            //printf("[LOG] Attempt erasing %d\n",i);
             qAVLTreeIterator testiter;
             int stat = qAVLTree_ptr_at(desc,testiter,i);
             if(stat != 0){
