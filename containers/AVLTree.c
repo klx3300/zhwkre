@@ -127,6 +127,11 @@ void qAVLTree__list_insert_right(qAVLTreeNode* parent,qAVLTreeNode* child){
     parent->next = child;
 }
 
+void qAVLTree__list_remove(qAVLTreeNode* elem){
+    if(elem->prev!=NULL) elem->prev->next = elem->next;
+    if(elem->next!=NULL) elem->next->prev = elem->prev;
+}
+
 // parent: where do i come from?
 qAVLTreeNode* qAVLTree__recursive_insert(qAVLTreeDescriptor desc,qAVLTreeNode* root,void* elem,ui size){
     int cmpresult = (desc.comp(elem,size,root->data,root->size));
@@ -245,4 +250,229 @@ int qAVLTree__insert(qAVLTreeDescriptor *desc,void* elem,ui size){
     desc->size=desc->size+1;
     desc->root = retv;
     return 0;
+}
+
+// this enum is used to embed the whole deletion possibilites into
+// one recursive delete function.
+enum{
+    DELETE_OPER_FIND = 0, // still did not found the elem
+    DELETE_OPER_LEFTMAX, // to_replace is left-max
+    DELETE_OPER_RIGHTMIN // to_replace is right-min
+};
+
+int qAVLTree__recursive_delete(qAVLTreeDescriptor desc,qAVLTreeNode* root,qAVLTreeIterator elem,qAVLTreeNode** newrootptr,int opercode){
+    int cmpresult = desc.comp(elem.node->data,elem.node->size,root->data,root->size);
+    if(cmpresult == 0){
+        // yes we get it!
+        // is this a leaf or not?
+        // the simple way: check blfactor & lchild null
+        if(root->blfactor == 0){
+            // balanced!
+            // if lucky enough, it is a leaf.
+            if(root->lchild == NULL){
+                // a leaf
+                // then simply boom myself!!
+                // or not..
+                if(opercode != DELETE_OPER_FIND){
+                    // need swap
+                    void* tmpdtswp = root->data;
+                    root->data = elem.node->data;
+                    elem.node->data = tmpdtswp;
+                    unsigned int tmpszswp = root->size;
+                    root->size = elem.node->size;
+                    elem.node->size = tmpszswp;
+                }
+                free(root->data);
+                // remove myself..
+                qAVLTree__list_remove(root);
+                *newrootptr = NULL;
+                free(root);
+                return 0;
+            }
+            // both child exists, obviously
+            // randomly select one..
+            // i choose.. leftmax!
+            qAVLTreeNode* newroot=NULL;
+            int status = qAVLTree__recursive_delete(desc,root->lchild,elem,&newroot,DELETE_OPER_LEFTMAX);
+            if(status) return status;
+            root->lchild = newroot;
+            root->blfactor = root->blfactor+1;
+            if(root->blfactor >= 2){
+                // trigger rotation
+                if(root->rchild->lchild != NULL || root->rchild->lchild->blfactor >= 0){
+                    *newrootptr = qAVLTree__SimpleLeftRotate(root);
+                }else{
+                    *newrootptr = qAVLTree__RightLeftRotate(root);
+                }
+            }
+            return 0;
+        }else if(root->blfactor < 0){
+            // left heavier => leftmax
+            qAVLTreeNode* newroot=NULL;
+            int status = qAVLTree__recursive_delete(desc,root->lchild,elem,&newroot,DELETE_OPER_LEFTMAX);
+            if(status) return status;
+            root->lchild = newroot;
+            root->blfactor = root->blfactor+1;
+            if(root->blfactor >= 2){
+                // trigger rotation
+                if(root->rchild->lchild != NULL || root->rchild->lchild->blfactor >= 0){
+                    *newrootptr = qAVLTree__SimpleLeftRotate(root);
+                }else{
+                    *newrootptr = qAVLTree__RightLeftRotate(root);
+                }
+            }
+            return 0;
+        }else{
+            // right heavier => rightmin
+            qAVLTreeNode* newroot = NULL;
+            int status = qAVLTree__recursive_delete(desc,root->rchild,elem,&newroot,DELETE_OPER_RIGHTMIN);
+            if(status) return status;
+            root->rchild = newroot;
+            root->blfactor = root->blfactor-1;
+            if(root->blfactor <= -2){
+                // trigger rotation
+                if(root->lchild->rchild == NULL || root->lchild->rchild->blfactor<=0){
+                    *newrootptr = qAVLTree__SimpleRightRotate(root);
+                }else{
+                    *newrootptr = qAVLTree__LeftRightRotate(root);
+                }
+            }
+            return 0;
+        }
+    }else if((cmpresult < 0 && opercode == DELETE_OPER_FIND) || opercode == DELETE_OPER_RIGHTMIN){
+        // elem < root
+        if(root->lchild == NULL){
+            if(opercode != DELETE_OPER_RIGHTMIN) return 1;
+            // a delete_right_min reached minimum right node!
+            // hint: rchild can't be null. WHY?
+            // swap!
+            void* tmpdtswp = root->data;
+            root->data = elem.node->data;
+            elem.node->data = tmpdtswp;
+            unsigned int tmpszswp = root->size;
+            root->size = elem.node->size;
+            elem.node->size = tmpszswp;
+            // save the rchild -- it will be the new root!
+            qAVLTreeNode* newroot = root->rchild;
+            // boom myself
+            free(root->data);
+            qAVLTree__list_remove(root);
+            free(root);
+            *newrootptr = newroot;
+            return 0;
+        }
+        qAVLTreeNode* newroot=NULL;
+        int status = qAVLTree__recursive_delete(desc,root->lchild,elem,&newroot,DELETE_OPER_FIND);
+        if(status) return status;
+        root->lchild = newroot;
+        // update blfactor
+        root->blfactor = root->blfactor+1;
+        if(root->blfactor >= 2){
+            // trigger rotation
+            if(root->rchild->lchild != NULL || root->rchild->lchild->blfactor >= 0){
+                *newrootptr = qAVLTree__SimpleLeftRotate(root);
+            }else{
+                *newrootptr = qAVLTree__RightLeftRotate(root);
+            }
+        }
+        return 0;
+    }else if((cmpresult > 0 && opercode == DELETE_OPER_FIND) || opercode == DELETE_OPER_LEFTMAX){
+        // elem > root
+        if(root->rchild == NULL){
+            if(opercode != DELETE_OPER_LEFTMAX) return 1;
+            // a delete_left_max reached maximum left node!
+            void* tmpdtswp = root->data;
+            root->data = elem.node->data;
+            elem.node->data = tmpdtswp;
+            unsigned int tmpszswp = root->size;
+            root->size = elem.node->size;
+            elem.node->size = tmpszswp;
+            // save the lchild -- it will be the new root!
+            qAVLTreeNode* newroot = root->lchild;
+            // boom myself
+            free(root->data);
+            qAVLTree__list_remove(root);
+            free(root);
+            *newrootptr = newroot;
+            return 0;
+        }
+        qAVLTreeNode* newroot=NULL;
+        int status = qAVLTree__recursive_delete(desc,root->rchild,elem,&newroot,DELETE_OPER_FIND);
+        if(status) return status;
+        root->rchild = newroot;
+        root->blfactor = root->blfactor-1;
+        if(root->blfactor <= -2){
+            if(root->lchild->rchild == NULL || root->lchild->rchild->blfactor<=0){
+                // in this case ,simple right rotate is good enough.
+                *newrootptr = qAVLTree__SimpleRightRotate(root);
+            }else{
+                *newrootptr = qAVLTree__LeftRightRotate(root);
+            }
+        }
+        return 0;
+    }else{
+        SETERR(ZHWK_ERR_TREE_UNEXPECTED_CASE);
+        return -1;
+    }
+}
+
+int qAVLTree__delete(qAVLTreeDescriptor *desc,qAVLTreeIterator elem){
+    if(desc->size == 0) return -1;
+    qAVLTreeNode* newroot = NULL;
+    int status = qAVLTree__recursive_delete(*desc,desc->root,elem,&newroot,DELETE_OPER_FIND);
+    if(status) return status;
+    desc->size--;
+    desc->root = newroot;
+    return 0;
+}
+
+int qAVLTree__destructor(qAVLTreeDescriptor *desc){
+    // destructive free!
+    qAVLTreeNode* min_node = desc->root;
+    while(min_node->lchild != NULL) min_node = min_node->lchild;
+    for(;min_node!=NULL;){
+        qAVLTreeNode* nextnode = min_node->next;
+        free(min_node->data);
+        free(min_node);
+        min_node = nextnode;
+    }
+    memset(desc,0,sizeof(qAVLTreeDescriptor));
+    return 0;
+}
+
+qAVLTreeIterator qAVLTree_begin(qAVLTreeDescriptor desc){
+    qAVLTreeNode* min_node = desc.root;
+    while(min_node->lchild != NULL) min_node = min_node->lchild;
+    qAVLTreeIterator it;
+    it.node = min_node;
+    return it;
+}
+
+qAVLTreeIterator qAVLTree_end(qAVLTreeDescriptor desc){
+    qAVLTreeNode* max_node = desc.root;
+    while(max_node->rchild != NULL) max_node = max_node->rchild;
+    qAVLTreeIterator it;
+    it.node = max_node;
+    return it;
+}
+
+int qAVLTreeIterator_isvalid(qAVLTreeIterator iter){
+    return iter.node != NULL;
+}
+
+void* qAVLTreeIterator_deref(qAVLTreeIterator iter){
+    if(qAVLTreeIterator_isvalid(iter)) return iter.node->data;
+    return NULL;
+}
+
+qAVLTreeIterator qAVLTreeIterator_prev(qAVLTreeIterator iter){
+    qAVLTreeIterator priter;
+    priter.node = iter.node->prev;
+    return priter;
+}
+
+qAVLTreeIterator qAVLTreeIterator_next(qAVLTreeIterator iter){
+    qAVLTreeIterator priter;
+    priter.node = iter.node->next;
+    return priter;
 }
