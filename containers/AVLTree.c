@@ -41,7 +41,7 @@ int qAVLTree__ptr_at(qAVLTreeDescriptor desc,qAVLTreeIterator *iter,void* elem,u
     while(searchreach != NULL){
         int cmpresult = desc.comp(elem,elemsize,searchreach->data,searchreach->size);
         if(cmpresult == 0){
-            iter->node = searchreach;
+            if(iter!=NULL) iter->node = searchreach;
             return 0;
         }
         if(cmpresult < 0){
