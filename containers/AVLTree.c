@@ -1,16 +1,21 @@
 #include "../AVLTree.h"
 #include "../error.h"
+#include "../unidef.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define PTR(x) (&(x))
-#define VPTR(x) ((void*)(&(x)))
-#define DEREF(x) (*(x))
-#define ZEROINIT(x) memset(&(x),0,sizeof(x))
 
 typedef unsigned int ui;
 typedef int (*Cmp)(void*,ui,void*,ui);
+
+#define qAVLTreeNode__updateHeight(rootnd) (MAX(qAVLTreeNode__getHeight((rootnd)->lchild),qAVLTreeNode__getHeight((rootnd)->rchild))+1)
+#define qAVLTreeNode__get_blfactor(rootnd) (qAVLTreeNode__getHeight((rootnd)->rchild)-qAVLTreeNode__getHeight((rootnd)->lchild))
+
+ui qAVLTreeNode__getHeight(qAVLTreeNode* tn){
+    if(tn == NULL) return 0;
+    return tn->height;
+}
 
 qAVLTreeNode* qAVLTreeNode__constructor(){
     qAVLTreeNode* it=malloc(sizeof(qAVLTreeNode));
@@ -63,7 +68,8 @@ qAVLTreeNode* qAVLTree__SimpleLeftRotate(qAVLTreeNode* root){
     root->rchild = rrchild->lchild;
     rrchild->lchild = root;
     // update height accordingly
-    // TODO
+    root->height = qAVLTreeNode__updateHeight(root);
+    rrchild -> height = qAVLTreeNode__updateHeight(rrchild);
     return rrchild;
 }
 
@@ -77,7 +83,8 @@ qAVLTreeNode* qAVLTree__SimpleRightRotate(qAVLTreeNode* root){
     root->lchild = rlchild->rchild;
     rlchild->rchild = root;
     // need update height
-    // TODO
+    root->height = qAVLTreeNode__updateHeight(root);
+    rlchild -> height = qAVLTreeNode__updateHeight(rlchild);
     return rlchild;
 }
 
@@ -132,6 +139,29 @@ void qAVLTree__list_remove(qAVLTreeNode* elem){
     if(elem->next!=NULL) elem->next->prev = elem->prev;
 }
 
+qAVLTreeNode* qAVLTree__left_balance(qAVLTreeDescriptor desc,qAVLTreeNode* root){
+    if(qAVLTreeNode__get_blfactor(root)<=-2){
+        // trigger rotation
+        if(root->lchild->rchild != NULL && qAVLTreeNode__get_blfactor(root->lchild->rchild) > 0){
+            return qAVLTree__LeftRightRotate(root);
+        }else{
+            return qAVLTree__SimpleRightRotate(root);
+        }
+    }
+    return root;
+}
+
+qAVLTreeNode* qAVLTree__right_balance(qAVLTreeDescriptor desc,qAVLTreeNode* root){
+    if(qAVLTreeNode__get_blfactor(root) >= 2){
+        if(root->rchild->lchild != NULL && qAVLTreeNode__get_blfactor(root->rchild->lchild) > 0){
+            return qAVLTree__RightLeftRotate(root);
+        }else{
+            return qAVLTree__SimpleLeftRotate(root);
+        }
+    }
+    return root;
+}
+
 // parent: where do i come from?
 int qAVLTree__recursive_insert(qAVLTreeDescriptor desc,qAVLTreeNode* root,void* elem,ui size,qAVLTreeNode** newrootptr){
     int cmpresult = (desc.comp(elem,size,root->data,root->size));
@@ -141,9 +171,8 @@ int qAVLTree__recursive_insert(qAVLTreeDescriptor desc,qAVLTreeNode* root,void* 
     }else if(cmpresult < 0){
         if(root->lchild == NULL){
             // well, you there then!
-            qAVLTreeNode* tmpnd = malloc(sizeof(qAVLTreeNode));
+            qAVLTreeNode* tmpnd = qAVLTreeNode__constructor();
             if(tmpnd == NULL){
-                SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
                 return -1;
             }
             void* cpdata = malloc(size);
@@ -157,11 +186,11 @@ int qAVLTree__recursive_insert(qAVLTreeDescriptor desc,qAVLTreeNode* root,void* 
             memcpy(cpdata,elem,size);
             tmpnd->size = size;
             tmpnd->data = cpdata;
+            tmpnd->height = 1;
             // complete insertion
             qAVLTree__list_insert_left(root,tmpnd);
             root->lchild = tmpnd;
-            // update height
-            // TODO
+            root->height = qAVLTreeNode__updateHeight(root);
             *newrootptr = root;
             return 0;
         }
@@ -173,22 +202,13 @@ int qAVLTree__recursive_insert(qAVLTreeDescriptor desc,qAVLTreeNode* root,void* 
             return insresult;
         }
         // TODO: update height and trigger rotation
-        if(??){
-            // trigger rotation
-            if(root->lchild->rchild != NULL && ??){
-                *newrootptr = qAVLTree__LeftRightRotate(root);
-            }else{
-                *newrootptr = qAVLTree__SimpleRightRotate(root);
-            }
-            return 0;
-        }
-        *newrootptr = root;
+        root->height = qAVLTreeNode__updateHeight(root);
+        *newrootptr = qAVLTree__left_balance(desc,root);
         return 0;
     }else{
         if(root->rchild == NULL){
-            qAVLTreeNode* tmpnd = malloc(sizeof(qAVLTreeNode));
+            qAVLTreeNode* tmpnd = qAVLTreeNode__constructor();
             if(tmpnd == NULL){
-                SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
                 return -1;
             }
             void* cpdata = malloc(size);
@@ -201,9 +221,11 @@ int qAVLTree__recursive_insert(qAVLTreeDescriptor desc,qAVLTreeNode* root,void* 
             memcpy(cpdata,elem,size);
             tmpnd->size = size;
             tmpnd->data = cpdata;
+            tmpnd->height = 1;
             qAVLTree__list_insert_right(root,tmpnd);
             root->rchild = tmpnd;
             // TODO: update height
+            root->height = qAVLTreeNode__updateHeight(root);
             *newrootptr = root;
             return 0;
         }
@@ -214,16 +236,8 @@ int qAVLTree__recursive_insert(qAVLTreeDescriptor desc,qAVLTreeNode* root,void* 
             *newrootptr = root;
             return insresult;
         }
-        // TODO: update height & trigger rotation
-        if(??){
-            if(root->rchild->lchild != NULL && ??){
-                *newrootptr = qAVLTree__RightLeftRotate(root);
-            }else{
-                *newrootptr = qAVLTree__SimpleLeftRotate(root);
-            }
-            return 0;
-        }
-        *newrootptr = root;
+        root->height = qAVLTreeNode__updateHeight(root);
+        *newrootptr = qAVLTree__right_balance(desc,root);
         return -1;
     }
 }
@@ -253,37 +267,115 @@ int qAVLTree__insert(qAVLTreeDescriptor *desc,void* elem,ui size){
     // recursive version kick in
     qAVLTreeNode* newroot = NULL;
     int retv = qAVLTree__recursive_insert(*desc,desc->root,elem,size,&newroot);
-    if(retv == INSERT_OPER_FAILED) return -1;
+    if(retv) return -1;
     desc->size+=1;
     desc->root = newroot;
     return 0;
 }
 
-// this enum is used to embed the whole deletion possibilites into
-// one recursive delete function.
-enum{
-    DELETE_OPER_FIND = 0, // still did not found the elem
-    DELETE_OPER_LEFTMAX, // to_replace is left-max
-    DELETE_OPER_RIGHTMIN // to_replace is right-min
-};
+#define qAVLTreeNode__swap(pnda,pndb) {\
+    qAVLTreeNode *nda=(pnda),*ndb=(pndb);\
+    void* tmpdtswp = nda->data;\
+    nda->data = ndb->data;\
+    ndb->data = tmpdtswp;\
+    ui tmpszswp = nda->size;\
+    nda->size = ndb->size;\
+    ndb->size = tmpszswp;\
+    }
 
-int qAVLTree__recursive_delete(qAVLTreeDescriptor desc,qAVLTreeNode* root,qAVLTreeIterator elem,qAVLTreeNode** newrootptr,int opercode){
+qAVLTreeNode* qAVLTree__delete_leftmax(qAVLTreeDescriptor desc,qAVLTreeNode* root,qAVLTreeIterator elem){
+    if(root->rchild != NULL){
+        qAVLTreeNode* newroot = qAVLTree__delete_leftmax(desc,root->rchild,elem);
+        root->rchild = newroot;
+        root->height = qAVLTreeNode__updateHeight(root);
+        return qAVLTree__right_balance(desc,root);
+    }
+    // the rightmost node
+    qAVLTreeNode__swap(root,elem.node);
+    qAVLTreeNode* remain = root->lchild;
+    free(root->data);
+    qAVLTree__list_remove(root);
+    free(root);
+    return remain;
+}
+qAVLTreeNode* qAVLTree__delete_rightmin(qAVLTreeDescriptor desc,qAVLTreeNode* root,qAVLTreeIterator elem){
+    if(root->lchild != NULL){
+        qAVLTreeNode* newroot = qAVLTree__delete_rightmin(desc,root->lchild,elem);
+        root->lchild = newroot;
+        root->height = qAVLTreeNode__updateHeight(root);
+        return qAVLTree__left_balance(desc,root);
+    }
+    // the leftmost node
+    qAVLTreeNode__swap(root,elem.node);
+    qAVLTreeNode* remain = root->rchild;
+    free(root->data);
+    qAVLTree__list_remove(root);
+    free(root);
+    return remain;
+}
+
+int qAVLTree__recursive_delete(qAVLTreeDescriptor desc,qAVLTreeNode* root,qAVLTreeIterator elem,qAVLTreeNode** newrootptr){
     int cmpresult = desc.comp(elem.node->data,elem.node->size,root->data,root->size);
     // TODO: completes this
     if(cmpresult == 0){
-    }else if((cmpresult < 0 && opercode == DELETE_OPER_FIND) || opercode == DELETE_OPER_RIGHTMIN){
-    }else if((cmpresult > 0 && opercode == DELETE_OPER_FIND) || opercode == DELETE_OPER_LEFTMAX){
+        // is this a leaf?
+        if(qAVLTreeNode__getHeight(root) == 1){
+            // clear myself
+            *newrootptr = NULL;
+            free(root->data);
+            qAVLTree__list_remove(root);
+            free(root);
+            return 0;
+        }else{
+            // select!
+            if(qAVLTreeNode__get_blfactor(root)>0){
+                qAVLTreeNode* newroot = qAVLTree__delete_rightmin(desc,root->rchild,elem);
+                root->rchild = newroot;
+                root->height = qAVLTreeNode__updateHeight(root);
+                *newrootptr = qAVLTree__right_balance(desc,root);
+                return 0;
+            }else{
+                qAVLTreeNode* newroot = qAVLTree__delete_leftmax(desc,root->lchild,elem);
+                root->lchild = newroot;
+                root->height = qAVLTreeNode__updateHeight(root);
+                *newrootptr = qAVLTree__left_balance(desc,root);
+                return 0;
+            }
+        }
+    }else if(cmpresult < 0){
+        if(root->lchild == NULL){
+            *newrootptr = root;
+            return -1;
+        }
+        qAVLTreeNode* newroot = NULL;
+        int status = qAVLTree__recursive_delete(desc,root->lchild,elem,&newroot);
+        *newrootptr = root;
+        if(status) return status;
+        root->lchild = newroot;
+        root->height = qAVLTreeNode__updateHeight(root);
+        *newrootptr = qAVLTree__left_balance(desc,root);
+        return 0;
     }else{
-        SETERR(ZHWK_ERR_TREE_UNEXPECTED_CASE);
-        return -1;
+        if(root->rchild == NULL){
+            *newrootptr = root;
+            return -1;
+        }
+        qAVLTreeNode *newroot = NULL;
+        int status = qAVLTree__recursive_delete(desc,root->rchild,elem,&newroot);
+        *newrootptr = root;
+        if(status) return status;
+        root->rchild = newroot;
+        root->height = qAVLTreeNode__updateHeight(root);
+        *newrootptr = qAVLTree__right_balance(desc,root);
+        return 0;
     }
 }
 
 int qAVLTree__erase(qAVLTreeDescriptor *desc,qAVLTreeIterator elem){
     if(desc->size == 0) return -1;
     qAVLTreeNode* newroot = NULL;
-    int status = qAVLTree__recursive_delete(*desc,desc->root,elem,&newroot,DELETE_OPER_FIND);
-    if(status == -1) return status;
+    int status = qAVLTree__recursive_delete(*desc,desc->root,elem,&newroot);
+    if(status) return status;
     desc->size--;
     desc->root = newroot;
     return 0;
