@@ -8,7 +8,7 @@ struct q__avltree_node_st{
     struct q__avltree_node_st *rchild;
     struct q__avltree_node_st *prev;
     struct q__avltree_node_st *next;
-    char blfactor;
+    unsigned int height;
 };
 
 struct q__avltree_desc_st{

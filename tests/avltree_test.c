@@ -83,6 +83,7 @@ int main(void){
                 printf("[ERR] While erasing %d ptr_at returned stat %d\n",i,stat);
                 exit(1);
             }
+            //printf("[LOG] Attempting erase %d\n",i);
             stat = qAVLTree_erase(desc,testiter);
             if(stat != 0){
                 printf("[ERR] While erasing %d erase returned stat %d\n",i,stat);
