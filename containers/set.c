@@ -75,3 +75,20 @@ qSetDescriptor qSet_difference(qSetDescriptor seta,qSetDescriptor setb){
     }
     return desc;
 }
+int qSet_isequal(qSetDescriptor seta, qSetDescriptor setb){
+    if(seta.size != setb.size) return 0;
+    for(qSetIterator iter = qSet_begin(seta);qSetIterator_isvalid(iter);iter=qSetIterator_next(iter)){
+        if(qSet__ptr_at(setb,NULL,qSetIterator_deref(iter),iter.node->size)){
+            return 0;
+        }
+    }
+    return 1;
+}
+int qSet_issubset(qSetDescriptor seta,qSetDescriptor setb){
+    for(qSetIterator iter = qSet_begin(seta);qSetIterator_isvalid(iter);iter=qSetIterator_next(iter)){
+        if(qSet__ptr_at(setb,NULL,qSetIterator_deref(iter),iter.node->size)){
+            return 0;
+        }
+    }
+    return 1;
+}

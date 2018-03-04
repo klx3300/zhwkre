@@ -33,5 +33,8 @@ qSetIterator qSetIterator_next(qSetIterator iter);
 qSetDescriptor qSet_union(qSetDescriptor seta,qSetDescriptor setb);
 qSetDescriptor qSet_intersect(qSetDescriptor seta,qSetDescriptor setb);
 qSetDescriptor qSet_difference(qSetDescriptor seta,qSetDescriptor setb);
+int qSet_isequal(qSetDescriptor seta, qSetDescriptor setb);
+// is a the subset of b?
+int qSet_issubset(qSetDescriptor seta,qSetDescriptor setb);
 
 #endif
