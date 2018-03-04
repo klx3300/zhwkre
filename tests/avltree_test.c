@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "../error.h"
 
-#define TESTNUM 10
+#define TESTNUM 10000000
 
 int int_comparator(void* a,unsigned int asize,void* b,unsigned int bsize){
     if(asize != 4 || bsize != 4){

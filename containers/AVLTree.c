@@ -12,7 +12,7 @@ typedef int (*Cmp)(void*,ui,void*,ui);
 #define qAVLTreeNode__updateHeight(rootnd) (MAX(qAVLTreeNode__getHeight((rootnd)->lchild),qAVLTreeNode__getHeight((rootnd)->rchild))+1)
 #define qAVLTreeNode__get_blfactor(rootnd) (qAVLTreeNode__getHeight((rootnd)->rchild)-qAVLTreeNode__getHeight((rootnd)->lchild))
 
-ui qAVLTreeNode__getHeight(qAVLTreeNode* tn){
+int qAVLTreeNode__getHeight(qAVLTreeNode* tn){
     if(tn == NULL) return 0;
     return tn->height;
 }
@@ -142,7 +142,7 @@ void qAVLTree__list_remove(qAVLTreeNode* elem){
 qAVLTreeNode* qAVLTree__left_balance(qAVLTreeDescriptor desc,qAVLTreeNode* root){
     if(qAVLTreeNode__get_blfactor(root)<=-2){
         // trigger rotation
-        if(root->lchild->rchild != NULL && qAVLTreeNode__get_blfactor(root->lchild->rchild) > 0){
+        if(root->lchild != NULL && root->lchild->rchild != NULL && qAVLTreeNode__get_blfactor(root->lchild->rchild) > 0){
             return qAVLTree__LeftRightRotate(root);
         }else{
             return qAVLTree__SimpleRightRotate(root);
@@ -153,7 +153,7 @@ qAVLTreeNode* qAVLTree__left_balance(qAVLTreeDescriptor desc,qAVLTreeNode* root)
 
 qAVLTreeNode* qAVLTree__right_balance(qAVLTreeDescriptor desc,qAVLTreeNode* root){
     if(qAVLTreeNode__get_blfactor(root) >= 2){
-        if(root->rchild->lchild != NULL && qAVLTreeNode__get_blfactor(root->rchild->lchild) > 0){
+        if(root->rchild != NULL && root->rchild->lchild != NULL && qAVLTreeNode__get_blfactor(root->rchild->lchild) > 0){
             return qAVLTree__RightLeftRotate(root);
         }else{
             return qAVLTree__SimpleLeftRotate(root);
@@ -238,7 +238,7 @@ int qAVLTree__recursive_insert(qAVLTreeDescriptor desc,qAVLTreeNode* root,void* 
         }
         root->height = qAVLTreeNode__updateHeight(root);
         *newrootptr = qAVLTree__right_balance(desc,root);
-        return -1;
+        return 0;
     }
 }
 
