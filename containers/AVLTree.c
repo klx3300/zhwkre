@@ -167,6 +167,7 @@ int qAVLTree__recursive_insert(qAVLTreeDescriptor desc,qAVLTreeNode* root,void* 
     int cmpresult = (desc.comp(elem,size,root->data,root->size));
     if(cmpresult == 0){
         // unfortunately, already exists.
+        *newrootptr = root;
         return -1;
     }else if(cmpresult < 0){
         if(root->lchild == NULL){
@@ -384,7 +385,7 @@ int qAVLTree__erase(qAVLTreeDescriptor *desc,qAVLTreeIterator elem){
 int qAVLTree__destructor(qAVLTreeDescriptor *desc){
     // destructive free!
     qAVLTreeNode* min_node = desc->root;
-    while(min_node->lchild != NULL) min_node = min_node->lchild;
+    while(min_node != NULL && min_node->lchild != NULL) min_node = min_node->lchild;
     for(;min_node!=NULL;){
         qAVLTreeNode* nextnode = min_node->next;
         free(min_node->data);
@@ -397,7 +398,7 @@ int qAVLTree__destructor(qAVLTreeDescriptor *desc){
 
 qAVLTreeIterator qAVLTree_begin(qAVLTreeDescriptor desc){
     qAVLTreeNode* min_node = desc.root;
-    while(min_node->lchild != NULL) min_node = min_node->lchild;
+    while(min_node != NULL && min_node->lchild != NULL) min_node = min_node->lchild;
     qAVLTreeIterator it;
     it.node = min_node;
     return it;
@@ -405,7 +406,7 @@ qAVLTreeIterator qAVLTree_begin(qAVLTreeDescriptor desc){
 
 qAVLTreeIterator qAVLTree_end(qAVLTreeDescriptor desc){
     qAVLTreeNode* max_node = desc.root;
-    while(max_node->rchild != NULL) max_node = max_node->rchild;
+    while(max_node != NULL && max_node->rchild != NULL) max_node = max_node->rchild;
     qAVLTreeIterator it;
     it.node = max_node;
     return it;
