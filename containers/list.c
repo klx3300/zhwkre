@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 typedef void (*tmpfncptr)();
-qListIterator q__List_new(){
+static qListIterator q__List_new(){
     qListIterator tmp = (qListIterator)malloc(sizeof(struct q__List));
     if(tmp==NULL){
         SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
@@ -14,7 +14,7 @@ qListIterator q__List_new(){
     return tmp;
 }
 
-void q__List_initdesc(void* desc){
+static void q__List_initdesc(void* desc){
     struct q__ListDescriptor *ld = (qListDescriptor*)desc;
     memcpy(ld->ldmagic,Q__LD_MAGIC,10);
     ld->head = NULL;

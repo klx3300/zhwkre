@@ -18,7 +18,7 @@ qMap qMap_constructor(unsigned int maxhashv){
     return thas;
 }
 
-qMapData q__MapData_constructor(void* key,void* value,unsigned int keysize,
+static qMapData q__MapData_constructor(void* key,void* value,unsigned int keysize,
     unsigned int valuesize){
     qMapData ptr;
     ptr.keylen=keysize;

@@ -12,12 +12,12 @@ typedef int (*Cmp)(void*,ui,void*,ui);
 #define qAVLTreeNode__updateHeight(rootnd) (MAX(qAVLTreeNode__getHeight((rootnd)->lchild),qAVLTreeNode__getHeight((rootnd)->rchild))+1)
 #define qAVLTreeNode__get_blfactor(rootnd) (qAVLTreeNode__getHeight((rootnd)->rchild)-qAVLTreeNode__getHeight((rootnd)->lchild))
 
-int qAVLTreeNode__getHeight(qAVLTreeNode* tn){
+static int qAVLTreeNode__getHeight(qAVLTreeNode* tn){
     if(tn == NULL) return 0;
     return tn->height;
 }
 
-qAVLTreeNode* qAVLTreeNode__constructor(){
+static qAVLTreeNode* qAVLTreeNode__constructor(){
     qAVLTreeNode* it=malloc(sizeof(qAVLTreeNode));
     if(it == NULL){
         SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
@@ -57,7 +57,7 @@ int qAVLTree__ptr_at(qAVLTreeDescriptor desc,qAVLTreeIterator *iter,void* elem,u
 
 // all rotation functions returns the new root pointers
 // if there are needs to manage memory, already handled inside.
-qAVLTreeNode* qAVLTree__SimpleLeftRotate(qAVLTreeNode* root){
+static qAVLTreeNode* qAVLTree__SimpleLeftRotate(qAVLTreeNode* root){
     if(root->rchild == NULL){
         // no you have to be kidding me.
         SETERR(ZHWK_ERR_TREE_INVALID_OPERATION);
@@ -73,7 +73,7 @@ qAVLTreeNode* qAVLTree__SimpleLeftRotate(qAVLTreeNode* root){
     return rrchild;
 }
 
-qAVLTreeNode* qAVLTree__SimpleRightRotate(qAVLTreeNode* root){
+static qAVLTreeNode* qAVLTree__SimpleRightRotate(qAVLTreeNode* root){
     if(root->lchild == NULL){
         SETERR(ZHWK_ERR_TREE_INVALID_OPERATION);
         return NULL;
@@ -89,7 +89,7 @@ qAVLTreeNode* qAVLTree__SimpleRightRotate(qAVLTreeNode* root){
 }
 
 // any double rotations are combinations of simple rotations
-qAVLTreeNode* qAVLTree__LeftRightRotate(qAVLTreeNode* root){
+static qAVLTreeNode* qAVLTree__LeftRightRotate(qAVLTreeNode* root){
     if(root->lchild == NULL){
         SETERR(ZHWK_ERR_TREE_INVALID_OPERATION);
         return NULL;
@@ -103,7 +103,7 @@ qAVLTreeNode* qAVLTree__LeftRightRotate(qAVLTreeNode* root){
     return qAVLTree__SimpleRightRotate(root);
 }
 
-qAVLTreeNode* qAVLTree__RightLeftRotate(qAVLTreeNode* root){
+static qAVLTreeNode* qAVLTree__RightLeftRotate(qAVLTreeNode* root){
     if(root->rchild == NULL){
         SETERR(ZHWK_ERR_TREE_INVALID_OPERATION);
         return NULL;
@@ -116,7 +116,7 @@ qAVLTreeNode* qAVLTree__RightLeftRotate(qAVLTreeNode* root){
     return qAVLTree__SimpleLeftRotate(root);
 }
 
-void qAVLTree__list_insert_left(qAVLTreeNode* parent,qAVLTreeNode* child){
+static void qAVLTree__list_insert_left(qAVLTreeNode* parent,qAVLTreeNode* child){
     if(parent->prev != NULL){
         parent->prev->next = child;
     }
@@ -125,7 +125,7 @@ void qAVLTree__list_insert_left(qAVLTreeNode* parent,qAVLTreeNode* child){
     parent->prev = child;
 }
 
-void qAVLTree__list_insert_right(qAVLTreeNode* parent,qAVLTreeNode* child){
+static void qAVLTree__list_insert_right(qAVLTreeNode* parent,qAVLTreeNode* child){
     if(parent->next != NULL){
         parent->next->prev = child;
     }
@@ -134,12 +134,12 @@ void qAVLTree__list_insert_right(qAVLTreeNode* parent,qAVLTreeNode* child){
     parent->next = child;
 }
 
-void qAVLTree__list_remove(qAVLTreeNode* elem){
+static void qAVLTree__list_remove(qAVLTreeNode* elem){
     if(elem->prev!=NULL) elem->prev->next = elem->next;
     if(elem->next!=NULL) elem->next->prev = elem->prev;
 }
 
-qAVLTreeNode* qAVLTree__left_balance(qAVLTreeDescriptor desc,qAVLTreeNode* root){
+static qAVLTreeNode* qAVLTree__left_balance(qAVLTreeDescriptor desc,qAVLTreeNode* root){
     if(qAVLTreeNode__get_blfactor(root)<=-2){
         // trigger rotation
         if(root->lchild != NULL && root->lchild->rchild != NULL && qAVLTreeNode__get_blfactor(root->lchild->rchild) > 0){
@@ -151,7 +151,7 @@ qAVLTreeNode* qAVLTree__left_balance(qAVLTreeDescriptor desc,qAVLTreeNode* root)
     return root;
 }
 
-qAVLTreeNode* qAVLTree__right_balance(qAVLTreeDescriptor desc,qAVLTreeNode* root){
+static qAVLTreeNode* qAVLTree__right_balance(qAVLTreeDescriptor desc,qAVLTreeNode* root){
     if(qAVLTreeNode__get_blfactor(root) >= 2){
         if(root->rchild != NULL && root->rchild->lchild != NULL && qAVLTreeNode__get_blfactor(root->rchild->lchild) > 0){
             return qAVLTree__RightLeftRotate(root);
@@ -162,8 +162,7 @@ qAVLTreeNode* qAVLTree__right_balance(qAVLTreeDescriptor desc,qAVLTreeNode* root
     return root;
 }
 
-// parent: where do i come from?
-int qAVLTree__recursive_insert(qAVLTreeDescriptor desc,qAVLTreeNode* root,void* elem,ui size,qAVLTreeNode** newrootptr){
+static int qAVLTree__recursive_insert(qAVLTreeDescriptor desc,qAVLTreeNode* root,void* elem,ui size,qAVLTreeNode** newrootptr){
     int cmpresult = (desc.comp(elem,size,root->data,root->size));
     if(cmpresult == 0){
         // unfortunately, already exists.
@@ -284,7 +283,7 @@ int qAVLTree__insert(qAVLTreeDescriptor *desc,void* elem,ui size){
     ndb->size = tmpszswp;\
     }
 
-qAVLTreeNode* qAVLTree__delete_leftmax(qAVLTreeDescriptor desc,qAVLTreeNode* root,qAVLTreeIterator elem){
+static qAVLTreeNode* qAVLTree__delete_leftmax(qAVLTreeDescriptor desc,qAVLTreeNode* root,qAVLTreeIterator elem){
     if(root->rchild != NULL){
         qAVLTreeNode* newroot = qAVLTree__delete_leftmax(desc,root->rchild,elem);
         root->rchild = newroot;
@@ -299,7 +298,7 @@ qAVLTreeNode* qAVLTree__delete_leftmax(qAVLTreeDescriptor desc,qAVLTreeNode* roo
     free(root);
     return remain;
 }
-qAVLTreeNode* qAVLTree__delete_rightmin(qAVLTreeDescriptor desc,qAVLTreeNode* root,qAVLTreeIterator elem){
+static qAVLTreeNode* qAVLTree__delete_rightmin(qAVLTreeDescriptor desc,qAVLTreeNode* root,qAVLTreeIterator elem){
     if(root->lchild != NULL){
         qAVLTreeNode* newroot = qAVLTree__delete_rightmin(desc,root->lchild,elem);
         root->lchild = newroot;
@@ -315,7 +314,7 @@ qAVLTreeNode* qAVLTree__delete_rightmin(qAVLTreeDescriptor desc,qAVLTreeNode* ro
     return remain;
 }
 
-int qAVLTree__recursive_delete(qAVLTreeDescriptor desc,qAVLTreeNode* root,qAVLTreeIterator elem,qAVLTreeNode** newrootptr){
+static int qAVLTree__recursive_delete(qAVLTreeDescriptor desc,qAVLTreeNode* root,qAVLTreeIterator elem,qAVLTreeNode** newrootptr){
     int cmpresult = desc.comp(elem.node->data,elem.node->size,root->data,root->size);
     // TODO: completes this
     if(cmpresult == 0){

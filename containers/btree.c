@@ -24,7 +24,7 @@ qBTreeNode* qBTreeNode__constructor(){
 }
 
 // always use left child to be promote child
-qPair qBTreeNode__split_up(qBTreeDescriptor desc,qBTreeNode* nodesplit,qBTreeNode* toprochild){
+static qPair qBTreeNode__split_up(qBTreeDescriptor desc,qBTreeNode* nodesplit,qBTreeNode* toprochild){
     int firstcmp = desc.comp(nodesplit->extrakv.key,nodesplit->extrakv.keysize,nodesplit->kv[0].key,nodesplit->kv[0].keysize);
     if(firstcmp < 0){
         qPair topropair = nodesplit->kv[0];
@@ -81,7 +81,7 @@ qBTreeDescriptor qBTree_constructor(comper comp){
     return desc;
 }
 
-int qBTree__recursive_search(qBTreeDescriptor desc,qBTreeNode* root,qBTreeIterator* lastit,void* key,unsigned int keysize){
+static int qBTree__recursive_search(qBTreeDescriptor desc,qBTreeNode* root,qBTreeIterator* lastit,void* key,unsigned int keysize){
     // increase
     // compare first
     if(root == NULL){
@@ -137,7 +137,7 @@ int qBTree__ptr_at(qBTreeDescriptor desc,qBTreeIterator* iter,void* key,unsigned
 }
 
 // -1:EEXIST 0:SUCC 1:SPLIT
-int qBTree__recursive_insert(qBTreeDescriptor* desc,qBTreeNode** root,qPair pair){
+static int qBTree__recursive_insert(qBTreeDescriptor* desc,qBTreeNode** root,qPair pair){
     if(*root == NULL){
         *root = qBTreeNode__constructor();
         if(*root == NULL) return -1;
@@ -269,7 +269,7 @@ int qBTree__insert(qBTreeDescriptor* desc,void* key,unsigned int keysize,void* v
 }
 
 // which: the index of child need to be balanced
-int qBTree__rotate_left(qBTreeDescriptor* desc, qBTreeNode* root,int which){
+static int qBTree__rotate_left(qBTreeDescriptor* desc, qBTreeNode* root,int which){
     if(which == 2){
         return -1;
     }
@@ -289,7 +289,7 @@ int qBTree__rotate_left(qBTreeDescriptor* desc, qBTreeNode* root,int which){
     root->childs[which+1]->childs[2]=NULL;
     return 0;
 }
-int qBTree__rotate_right(qBTreeDescriptor* desc, qBTreeNode* root,int which){
+static int qBTree__rotate_right(qBTreeDescriptor* desc, qBTreeNode* root,int which){
     if(which == 0){
         return -1;
     }
@@ -307,7 +307,7 @@ int qBTree__rotate_right(qBTreeDescriptor* desc, qBTreeNode* root,int which){
     return 0;
 }
 // child zero is remain child needed to be merge to upper layer
-int qBTree__merge(qBTreeDescriptor* desc,qBTreeNode* root,int which){
+static int qBTree__merge(qBTreeDescriptor* desc,qBTreeNode* root,int which){
     switch(which){
         case 0:{
             root->childs[0]->kv[0]=root->kv[0];
@@ -356,7 +356,7 @@ int qBTree__merge(qBTreeDescriptor* desc,qBTreeNode* root,int which){
 }
 
 // FLAG_FREE: will this operation free the value deleted?
-int qBTree__recursive_erase_min(qBTreeDescriptor* desc,qBTreeNode* root,int FLAG_FREE){
+static int qBTree__recursive_erase_min(qBTreeDescriptor* desc,qBTreeNode* root,int FLAG_FREE){
     if(root == NULL){
         return -1;
     }
@@ -389,7 +389,7 @@ int qBTree__recursive_erase_min(qBTreeDescriptor* desc,qBTreeNode* root,int FLAG
     return 1;
 }
 
-int qBTree__get_min(qBTreeDescriptor* desc,qBTreeNode* root,qPair* mvpair,int FLAG_FREE_ORIG){
+static int qBTree__get_min(qBTreeDescriptor* desc,qBTreeNode* root,qPair* mvpair,int FLAG_FREE_ORIG){
     if(root == NULL) return -1;
     if(root->childs[0] != NULL) return qBTree__get_min(desc,root->childs[0],mvpair,FLAG_FREE_ORIG);
     if(FLAG_FREE_ORIG){
@@ -400,7 +400,7 @@ int qBTree__get_min(qBTreeDescriptor* desc,qBTreeNode* root,qPair* mvpair,int FL
     return 0;
 }
 
-int qBTree__recursive_erase(qBTreeDescriptor* desc,qBTreeNode* root,qPair target){
+static int qBTree__recursive_erase(qBTreeDescriptor* desc,qBTreeNode* root,qPair target){
     if(root == NULL){
         return -1;
     }

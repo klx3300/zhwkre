@@ -6,7 +6,7 @@
 #define TYPEALLOC(x) malloc(sizeof(x))
 #define ZEROINIT(x) memset(&(x),0,sizeof(x))
 
-qTrieNode* qTrieNode__constructor(){
+static qTrieNode* qTrieNode__constructor(){
     qTrieNode* tmp = TYPEALLOC(qTrieNode);
     ZEROINIT(*tmp);
     tmp->value = qbss_constructor();
@@ -17,7 +17,7 @@ qTrieNode* qTrieNode__constructor(){
 // will destruct any attached nodes.
 // if you want to delete this only
 // ZEROINIT children array first
-void qTrieNode__destructor(qTrieNode* node){
+static void qTrieNode__destructor(qTrieNode* node){
     qbss_destructor(node->value);
     qbss_destructor(node->payload);
     for(int i=0;i<255;i++){

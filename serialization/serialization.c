@@ -6,9 +6,8 @@
 
 #include <string.h>
 
-struct q__ListDescriptor q__list_serialize(struct q__ListDescriptor desc,qBinarySafeString prefix){
-    struct q__ListDescriptor rdesc;
-    qList_initdesc(rdesc); // initialize desc
+static struct q__ListDescriptor q__list_serialize(struct q__ListDescriptor desc,qBinarySafeString prefix){
+    struct q__ListDescriptor rdesc = qList_constructor();
     // construct buffer bss
     qBinarySafeString buffer = qbss_constructor(); // initialize bss
     qList_push_back(rdesc,buffer); // only copies the pointer value
@@ -64,8 +63,7 @@ struct q__ListDescriptor qSerialize(void* data,unsigned int len){
     if(q__List_islist(data,len)){
         return q__list_serialize(*((struct q__ListDescriptor*)data),qbss_constructor());
     }else{
-        struct q__ListDescriptor rdesc;
-        qList_initdesc(rdesc);
+        struct q__ListDescriptor rdesc = qList_constructor();
         qBinarySafeString tmpbss = qbss_constructor();
         qbss_append(tmpbss,data,len);
         qList_push_back(rdesc,tmpbss);
@@ -74,7 +72,7 @@ struct q__ListDescriptor qSerialize(void* data,unsigned int len){
 }
 
 // not proven very effective.
-unsigned int q__uhashf(void* str,unsigned int size){
+static unsigned int q__uhashf(void* str,unsigned int size){
     unsigned int tmpr = 0;
     unsigned char* cstr = str;
     for(unsigned int i=0;i<size;i++){
@@ -84,7 +82,7 @@ unsigned int q__uhashf(void* str,unsigned int size){
     return tmpr%131;
 }
 
-struct q__ListDescriptor q__list_unserialize(struct q__ListDescriptor dataset,qMap *previous_data){
+static struct q__ListDescriptor q__list_unserialize(struct q__ListDescriptor dataset,qMap *previous_data){
     // first, read all elements storaged in the last dataset.
     qBinarySafeString* lbss = dataset.tail->data;
     qMap lists = qMap_constructor(Q_DEFAULT_MAXHASHV);
