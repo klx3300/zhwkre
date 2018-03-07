@@ -13,12 +13,12 @@ qMap qMap_constructor(unsigned int maxhashv){
         return thas;
     }
     for(unsigned int iter=0;iter<maxhashv;iter++){
-        q__List_initdesc(thas.listArray+iter);
+        thas.listArray[iter] = qList_constructor();
     }
     return thas;
 }
 
-static qMapData q__MapData_constructor(void* key,void* value,unsigned int keysize,
+qMapData q__MapData_constructor(void* key,void* value,unsigned int keysize,
     unsigned int valuesize){
     qMapData ptr;
     ptr.keylen=keysize;
@@ -72,6 +72,7 @@ int q__Map_insert(qMap* thas,void* key,void* value,unsigned int keysize,
     if(tmpmpd.key == NULL || tmpmpd.value == NULL) return -1;
     q__List_push_back(thas->listArray+hashv,&tmpmpd,sizeof(tmpmpd));
     thas->counts++;
+    return 0;
 }
 
 int q__Map_erase(qMap* thas,void* key,unsigned int keysize,qHashFuncProto hashf){

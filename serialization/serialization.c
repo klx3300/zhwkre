@@ -86,8 +86,7 @@ static struct q__ListDescriptor q__list_unserialize(struct q__ListDescriptor dat
     // first, read all elements storaged in the last dataset.
     qBinarySafeString* lbss = dataset.tail->data;
     qMap lists = qMap_constructor(Q_DEFAULT_MAXHASHV);
-    qListDescriptor itemslist;
-    qList_initdesc(itemslist);
+    qListDescriptor itemslist = qList_constructor();
     unsigned int prefix_num = dataset.size - 1;
     for(char* stringiter=lbss->str;
         stringiter != lbss->str+(lbss->size);/*do nothing*/){
@@ -151,8 +150,7 @@ static struct q__ListDescriptor q__list_unserialize(struct q__ListDescriptor dat
                     q__List_push_back(tmpsiblings,tmpdata,tmpsize);
                 }else{
                     // i have to prepare for the coming brothers and sisters!
-                    qListDescriptor tmphouse;
-                    qList_initdesc(tmphouse);
+                    qListDescriptor tmphouse = qList_constructor();
                     q__List_push_back(&tmphouse,tmpdata,tmpsize);
                     // register in local address book.
                     q__Map_insert(&lists,tmprefix.str,&tmphouse,tmprefix.size,sizeof(qListDescriptor),q__uhashf);
