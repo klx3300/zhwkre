@@ -294,6 +294,7 @@ int qAVLTree__insert(qAVLTreeDescriptor *desc,void* elem,ui size){
         memcpy(cpdata,elem,size);
         desc->root->data = cpdata;
         desc->root->size = size;
+        desc->root->height = 1;
         desc->size = 1;
         return 0;
     }
@@ -386,7 +387,7 @@ int qAVLTree__recursive_delete(qAVLTreeDescriptor desc,qAVLTreeNode* root,qAVLTr
         if(status) return status;
         root->lchild = newroot;
         root->height = qAVLTreeNode__updateHeight(root);
-        *newrootptr = qAVLTree__left_balance(desc,root);
+        *newrootptr = qAVLTree__right_balance(desc,root);
         return 0;
     }else{
         if(root->rchild == NULL){
@@ -399,7 +400,7 @@ int qAVLTree__recursive_delete(qAVLTreeDescriptor desc,qAVLTreeNode* root,qAVLTr
         if(status) return status;
         root->rchild = newroot;
         root->height = qAVLTreeNode__updateHeight(root);
-        *newrootptr = qAVLTree__right_balance(desc,root);
+        *newrootptr = qAVLTree__left_balance(desc,root);
         return 0;
     }
 }
