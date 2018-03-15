@@ -1,4 +1,5 @@
 #include "../utils.h"
+#include "../unidef.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -38,3 +39,37 @@ int partstrcmp(const char* a,const char* b){
     }
     return 1;
 }
+
+int string_comparator(void* stra,unsigned int sizea,void* strb,unsigned int sizeb){
+    char *achar=stra,*bchar=strb;
+    int alen=strlen(achar),blen=strlen(bchar);
+    int cmplen=MIN(alen,blen);
+    for(int i=0;i<cmplen;i++){
+        if(achar[i]!=bchar[i]){
+            return achar[i]-bchar[i];
+        }
+    }
+    if(alen!=blen){
+        return alen-blen;
+    }
+    return 0;
+}
+
+qBinarySafeString readline(FILE* fp){
+    qBinarySafeString result = qbss_constructor();
+    for(int ch=fgetc(fp);ch!=EOF && ch!='\n';ch=fgetc(fp)){
+        char realch = (char)ch;
+        q__bss_append(&result,&realch,1);
+    }
+    return result;
+}
+
+qBinarySafeString readall(FILE* fp){
+    qBinarySafeString result = qbss_constructor();
+    for(int ch=fgetc(fp);ch!=EOF;ch=fgetc(fp)){
+        char realch = (char)ch;
+        q__bss_append(&result,&realch,1);
+    }
+    return result;
+}
+
