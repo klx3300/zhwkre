@@ -1,6 +1,7 @@
 #ifndef Q_RE_UTILS_H
 #define Q_RE_UTILS_H
 #include "bss.h"
+#include <stdio.h>
 
 int fullstrcmp(const char *a,const char* b);
 void printSomeSpaces(unsigned int spcs);

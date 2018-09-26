@@ -100,8 +100,8 @@ int qStreamSocket_nonblock_read(qSocket sock,char *buffer,unsigned int size){
     return actrlen;
 }
 
-int qStreamSocket_nonblock_readChar(qSocket sock,char* c){
-    int err = qStreamSocket_nonblockRead(sock,c,1);
+int qStreamSocket_nonblock_readchar(qSocket sock,char* c){
+    int err = qStreamSocket_nonblock_read(sock,c,1);
     return err;
 }
 

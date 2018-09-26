@@ -48,8 +48,8 @@ int qStreamSocket__setQuickAck(qSocket *sock,int quickack);
 int qStreamSocket_write(qSocket sock,const char* content,unsigned int length);
 int qStreamSocket_read(qSocket sock,char* buffer,unsigned int limitation);
 int qStreamSocket_readchar(qSocket sock,char* c);
-int qStreamSocket_nonblockRead(qSocket sock,char* buffer,unsigned int limitation);
-int qStreamSocket_nonblockReadChar(qSocket sock,char *c);
+int qStreamSocket_nonblock_read(qSocket sock,char* buffer,unsigned int limitation);
+int qStreamSocket_nonblock_readchar(qSocket sock,char *c);
 
 // datagram sockets (udp)
 int qDatagramSocket_receive(qSocket sock,char* srcaddr,char* buffer,unsigned int limitation,int flags);
