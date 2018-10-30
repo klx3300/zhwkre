@@ -1,5 +1,4 @@
 #include "../btree.h"
-#include "../error.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,7 +15,6 @@ typedef int (*comper)(void*,ui,void*,ui);
 qBTreeNode* qBTreeNode__constructor(){
     qBTreeNode* it = malloc(sizeof(qBTreeNode));
     if(it == NULL){
-        SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
         return NULL;
     }
     memset(it,0,sizeof(qBTreeNode));
@@ -233,7 +231,6 @@ int qBTree__insert(qBTreeDescriptor* desc,void* key,unsigned int keysize,void* v
     qPair topair;
     topair.key = malloc(keysize);
     if(topair.key == NULL){
-        SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
         return -1;
     }
     memcpy(topair.key,key,keysize);
@@ -241,7 +238,6 @@ int qBTree__insert(qBTreeDescriptor* desc,void* key,unsigned int keysize,void* v
     topair.value = malloc(valuesize);
     if(topair.value == NULL){
         free(topair.key);
-        SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
         return -1;
     }
     memcpy(topair.value,value,valuesize);

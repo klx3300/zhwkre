@@ -1,7 +1,6 @@
 #include "../unordered_map.h"
 #include <string.h>
 #include <stdio.h>
-#include "../error.h"
 
 qMap qMap_constructor(unsigned int maxhashv){
     qMap thas;
@@ -9,7 +8,6 @@ qMap qMap_constructor(unsigned int maxhashv){
     thas.counts=0;
     thas.listArray=(qListDescriptor*)malloc(sizeof(qListDescriptor)*maxhashv);
     if(thas.listArray == NULL){
-        SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
         return thas;
     }
     for(unsigned int iter=0;iter<maxhashv;iter++){
@@ -25,13 +23,11 @@ qMapData q__MapData_constructor(void* key,void* value,unsigned int keysize,
     ptr.valuelen=valuesize;
     ptr.key=malloc(keysize);
     if(ptr.key == NULL){
-        SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
         return ptr;
     }
     memcpy(ptr.key,key,keysize);
     ptr.value=malloc(valuesize);
     if(ptr.value == NULL){
-        SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
         return ptr;
     }
     memcpy(ptr.value,value,valuesize);

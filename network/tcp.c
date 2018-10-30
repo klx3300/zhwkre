@@ -1,6 +1,5 @@
 #include "../network.h"
 #include "../utils.h"
-#include "../error.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -8,7 +7,6 @@
 
 int qStreamSocket_connect(qSocket sock,const char* addrxport){
     if(sock.domain != qIPv4){
-        SETERR(ZHWK_ERR_SOCK_DOMAIN_INVAL);
         return -1;
     }
     struct sockaddr_in addr;
@@ -16,7 +14,6 @@ int qStreamSocket_connect(qSocket sock,const char* addrxport){
     addr.sin_family = qIPv4;
     int separator_pos = find_byte(addrxport,':',strlen(addrxport));
     if(separator_pos == -1){
-        SETERR(ZHWK_ERR_SOCK_ADDR_INVAL);
         return -1;
     }
     addr.sin_addr.s_addr=htonl(INADDR_ANY);
@@ -31,7 +28,6 @@ int qStreamSocket_connect(qSocket sock,const char* addrxport){
     }
     int connstat = connect(sock.desc,(struct sockaddr*)&addr,sizeof(struct sockaddr_in));
     if(connstat == -1){
-        SETERR(ZHWK_ERR_TCP_CONNECT_FAIL);
         return -1;
     }
     return 0;
@@ -40,7 +36,6 @@ int qStreamSocket_connect(qSocket sock,const char* addrxport){
 int qStreamSocket_listen(qSocket sock){
     int lisstat = listen(sock.desc,128); // 128:limitation of undecided connections.
     if(lisstat == -1){
-        SETERR(ZHWK_ERR_TCP_LISTEN_FAIL);
         return -1;
     }
     return 0;
@@ -58,7 +53,6 @@ qSocket qStreamSocket_accept(qSocket sock,char* srcaddr){
     socklen_t srcaddr_len = sizeof(srcaddr_in);
     srcinfo.desc = accept(sock.desc,(struct sockaddr*)&srcaddr_in,&srcaddr_len);
     if(srcinfo.desc == -1){
-        SETERR(ZHWK_ERR_TCP_ACCEPT_FAIL);
     }
     memset(srcaddr,0,26);
     strcpy(srcaddr,inet_ntoa(srcaddr_in.sin_addr));
@@ -70,21 +64,18 @@ int qStreamSocket__setQuickAck(qSocket *sock,int qack){
     sock->quickack = 1;
     int ssopt = setsockopt(sock->desc,IPPROTO_TCP,TCP_QUICKACK,&(sock->quickack),sizeof(int));
     if(ssopt == -1){
-        SETERR(ZHWK_ERR_SOCK_SETOPT_FAIL);
     }
     return ssopt;
 }
 
 int qStreamSocket_write(qSocket sock,const char* content,unsigned int size){
     int written=write(sock.desc,content,size);
-    if(written==-1) SETERR(ZHWK_ERR_TCP_WRITE_FAIL);
     return written;
 }
 int qStreamSocket_read(qSocket sock,char* buffer,unsigned int buffer_size){
     memset(buffer,0,buffer_size);
     int actrlen=read(sock.desc,buffer,buffer_size);
     if(actrlen == -1){
-        SETERR(ZHWK_ERR_TCP_READ_FAIL);
     }
     return actrlen;
 }
@@ -96,7 +87,6 @@ int qStreamSocket_readchar(qSocket sock,char* c){
 int qStreamSocket_nonblock_read(qSocket sock,char *buffer,unsigned int size){
     memset(buffer,0,size);
     int actrlen = recv(sock.desc,buffer,size,MSG_DONTWAIT);
-    if(actrlen == -1) SETERR(ZHWK_ERR_TCP_RECV_FAIL);
     return actrlen;
 }
 

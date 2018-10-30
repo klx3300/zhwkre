@@ -1,12 +1,10 @@
 #include "../concurrent.h"
-#include "../error.h"
 #include <stdio.h>
 
 qThread qStart(void* (*func)(void* args),void* args){
     qThread tmp;
     int errn;
     if((errn=pthread_create(&(tmp.threadno),NULL,func,args))==-1){
-        SETERR(ZHWK_ERR_THREAD_CREATE_FAIL);
     }
     return tmp;
 }
@@ -14,7 +12,6 @@ qThread qStart(void* (*func)(void* args),void* args){
 int qDetach(qThread thr){
     int errn;
     if((errn=pthread_detach(thr.threadno))==-1){
-        SETERR(ZHWK_ERR_THREAD_DETACH_FAIL);
     }
     return errn;
 }
@@ -34,7 +31,6 @@ void* qWait(qThread thr){
     int errn;
     void* res=NULL;
     if((errn=pthread_join(thr.threadno,&res))==-1){
-        SETERR(ZHWK_ERR_THREAD_JOIN_FAIL);
     }
     return res;
 }

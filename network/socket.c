@@ -1,6 +1,5 @@
 #include "../network.h"
 #include "../utils.h"
-#include "../error.h"
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -35,7 +34,6 @@ qSocket qSocket_constructor(int domain,int type,int protocol){
 int qSocket__open(qSocket* sock){
     sock->desc = socket(sock->domain,sock->type,sock->protocol);
     if(sock->desc == -1){
-        SETERR(ZHWK_ERR_SOCK_FD_OPEN_FAIL);
         return -1;
     }
     return 0;
@@ -45,7 +43,6 @@ int qSocket__open(qSocket* sock){
 // bind to address like ":80" means wildcard address with 80 port.
 int qSocket_bind(qSocket sock,const char* addrxport){
     if(sock.domain != qIPv4){
-        SETERR(ZHWK_ERR_SOCK_DOMAIN_INVAL);
         return -1;
     }
     struct sockaddr_in addr;
@@ -53,7 +50,6 @@ int qSocket_bind(qSocket sock,const char* addrxport){
     addr.sin_family = qIPv4;
     int separator_pos = find_byte(addrxport,':',strlen(addrxport));
     if(separator_pos == -1){
-        SETERR(ZHWK_ERR_SOCK_ADDR_INVAL);
         return -1;
     }
     addr.sin_addr.s_addr=htonl(INADDR_ANY);
@@ -68,7 +64,6 @@ int qSocket_bind(qSocket sock,const char* addrxport){
     }
     int bindstat = bind(sock.desc,(struct sockaddr*)&addr,sizeof(struct sockaddr_in));
     if(bindstat == -1){
-        SETERR(ZHWK_ERR_SOCK_BIND_FAIL);
         return -1;
     }
     return 0;
@@ -78,7 +73,6 @@ int qSocket__close(qSocket* sock){
     int retv = (close(sock->desc)!=-1);
     sock->desc = -1;
     if(retv == -1){
-        SETERR(ZHWK_ERR_SOCK_CLOSE_FAIL);
         return -1;
     }
     return 0;

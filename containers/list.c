@@ -1,12 +1,10 @@
 #include "../list.h"
-#include "../error.h"
 #include <stdlib.h>
 #include <string.h>
 typedef void (*tmpfncptr)();
 static qListIterator q__List_new(){
     qListIterator tmp = (qListIterator)malloc(sizeof(struct q__List));
     if(tmp==NULL){
-        SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
         return NULL;
     }
     tmp->data = tmp->prev = tmp->next = NULL;
@@ -39,7 +37,6 @@ int q__List_push_back(void* descriptor,void* target,unsigned int size){
         desc->tail=desc->head;
         desc->tail->data=malloc(size);
         if(desc->tail->data == NULL){
-            SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
             return -1;
         }
         memcpy(desc->tail->data,target,size);
@@ -53,7 +50,6 @@ int q__List_push_back(void* descriptor,void* target,unsigned int size){
         desc->tail->next->prev=desc->tail;
         desc->tail->next->data=malloc(size);
         if(desc->tail->next->data == NULL){
-            SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
             return -1;
         }
         memcpy(desc->tail->next->data,target,size);
@@ -75,7 +71,6 @@ int q__List_push_front(void* descriptor,void* target,unsigned int size){
         desc->tail=desc->head;
         desc->tail->data=malloc(size);
         if(desc->tail->data == NULL){
-            SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
             return -1;
         }
         memcpy(desc->tail->data,target,size);
@@ -89,7 +84,6 @@ int q__List_push_front(void* descriptor,void* target,unsigned int size){
         desc->head->prev->next=desc->head;
         desc->head->prev->data=malloc(size);
         if(desc->head->prev->data == NULL){
-            SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
             return -1;
         }
         memcpy(desc->head->prev->data,target,size);
@@ -103,7 +97,6 @@ int q__List_push_front(void* descriptor,void* target,unsigned int size){
 int q__List_pop_back(void* descriptor){
     struct q__ListDescriptor* desc = (struct q__ListDescriptor*)descriptor;
     if(desc->tail == NULL){
-        SETERR(ZHWK_ERR_LIST_EMPTY);
         return -1;
     };
     if(desc->tail==desc->head){
@@ -127,7 +120,6 @@ int q__List_pop_back(void* descriptor){
 int q__List_pop_front(void* descriptor){
     struct q__ListDescriptor* desc = (struct q__ListDescriptor*)descriptor;
     if(desc->head==NULL){
-        SETERR(ZHWK_ERR_LIST_EMPTY);
         return -1;
     };
     if(desc->tail==desc->head){

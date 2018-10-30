@@ -7,7 +7,6 @@ qBinarySafeString qbss_constructor(){
     qBinarySafeString bss;
     bss.str = malloc(64);
     if(bss.str == NULL){
-        SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
         return bss;
     }
     bss.size = 0;
@@ -30,7 +29,6 @@ void q__bss_append(qBinarySafeString* bss,char* str,unsigned int len){
         // realloc
         char* tmp = malloc(2*(bss->capacity));
         if(tmp == NULL){
-            SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
             return;
         }
         memset(tmp,0,2*(bss->capacity));

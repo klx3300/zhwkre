@@ -1,7 +1,6 @@
 #include "../vector.h"
 #include <stdlib.h>
 #include <string.h>
-#include "../error.h"
 
 #define ZEROINIT(x) memset(&(x),0,sizeof(x))
 
@@ -10,10 +9,11 @@ qVectorDescriptor qVector_constructor(int elemsize){
     ZEROINIT(desc);
     desc.size = malloc(sizeof(int));
     if(desc.size == NULL){
-        SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
+
+    }else{
+        *(desc.size) = 0;
+        desc.elemstep = elemsize;
     }
-    *(desc.size) = 0;
-    desc.elemstep = elemsize;
     return desc;
 }
 
@@ -22,7 +22,7 @@ int qVector__push_back(qVectorDescriptor* desc,void* elem){
         // REALLOC
         void* tmprealloc = malloc(2*(desc->allocated+desc->elemstep));
         if(tmprealloc == NULL){
-            SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
+            
             return -1;
         }
         if(desc->content != NULL){
@@ -43,7 +43,7 @@ int qVector__pop_back(qVectorDescriptor* desc){
     if(desc->allocated > 2*(*(desc->size)*desc->elemstep) && desc->allocated/2 != 0){
         void* tmprealloc = malloc(desc->allocated/2);
         if(tmprealloc == NULL){
-            SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
+            
             return -1;
         }
         memcpy(tmprealloc,desc->content,(*(desc->size))*desc->elemstep);
@@ -92,7 +92,7 @@ qVectorIterator qVectorIterator_move(qVectorIterator iter,int delta){
 int qVector__erase(qVectorDescriptor* desc,qVectorIterator positional){
     void *buffer = malloc(desc->elemstep);
     if(buffer == NULL){
-        SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
+        
         return -1; // zhwkerr not here!
     }
     memcpy(buffer,qVectorIterator_deref(positional),desc->elemstep);

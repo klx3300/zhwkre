@@ -1,5 +1,4 @@
 #include "../AVLTree.h"
-#include "../error.h"
 #include "../unidef.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,7 +19,6 @@ int qAVLTreeNode__getHeight(qAVLTreeNode* tn){
 qAVLTreeNode* qAVLTreeNode__constructor(){
     qAVLTreeNode* it=malloc(sizeof(qAVLTreeNode));
     if(it == NULL){
-        SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
         return NULL;
     }
     memset(it,0,sizeof(qAVLTreeNode));
@@ -60,7 +58,6 @@ int qAVLTree__ptr_at(qAVLTreeDescriptor desc,qAVLTreeIterator *iter,void* elem,u
 qAVLTreeNode* qAVLTree__SimpleLeftRotate(qAVLTreeNode* root){
     if(root->rchild == NULL){
         // no you have to be kidding me.
-        SETERR(ZHWK_ERR_TREE_INVALID_OPERATION);
         return NULL;
     }
     // perform rotation
@@ -91,7 +88,6 @@ qAVLTreeNode* qAVLTree__SimpleLeftRotate(qAVLTreeNode* root){
 
 qAVLTreeNode* qAVLTree__SimpleRightRotate(qAVLTreeNode* root){
     if(root->lchild == NULL){
-        SETERR(ZHWK_ERR_TREE_INVALID_OPERATION);
         return NULL;
     }
     qAVLTreeNode *rlchild = (root->lchild);
@@ -123,7 +119,6 @@ qAVLTreeNode* qAVLTree__SimpleRightRotate(qAVLTreeNode* root){
 // any double rotations are combinations of simple rotations
 qAVLTreeNode* qAVLTree__LeftRightRotate(qAVLTreeNode* root){
     if(root->lchild == NULL){
-        SETERR(ZHWK_ERR_TREE_INVALID_OPERATION);
         return NULL;
     }
     qAVLTreeNode* tmpreroot = qAVLTree__SimpleLeftRotate(root->lchild);
@@ -137,7 +132,6 @@ qAVLTreeNode* qAVLTree__LeftRightRotate(qAVLTreeNode* root){
 
 qAVLTreeNode* qAVLTree__RightLeftRotate(qAVLTreeNode* root){
     if(root->rchild == NULL){
-        SETERR(ZHWK_ERR_TREE_INVALID_OPERATION);
         return NULL;
     }
     qAVLTreeNode* tmpreroot = qAVLTree__SimpleRightRotate(root->rchild);
@@ -210,7 +204,6 @@ int qAVLTree__recursive_insert(qAVLTreeDescriptor desc,qAVLTreeNode* root,void* 
             }
             void* cpdata = malloc(size);
             if(cpdata == NULL){
-                SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
                 free(tmpnd);
                 return -1;
             }
@@ -246,7 +239,6 @@ int qAVLTree__recursive_insert(qAVLTreeDescriptor desc,qAVLTreeNode* root,void* 
             }
             void* cpdata = malloc(size);
             if(cpdata == NULL){
-                SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
                 free(tmpnd);
                 return -1;
             }
@@ -280,12 +272,10 @@ int qAVLTree__insert(qAVLTreeDescriptor *desc,void* elem,ui size){
         // the very first elem
         desc->root = malloc(sizeof(qAVLTreeNode));
         if(desc->root == NULL){
-            SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
             return -1;
         }
         void* cpdata = malloc(size);
         if(cpdata == NULL){
-            SETERR(ZHWK_ERR_MM_ALLOC_FAIL);
             free(desc->root);
             desc->root = NULL;
             return -1;
