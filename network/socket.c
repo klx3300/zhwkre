@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 // convert "0.0.0.0:0" like c-str to in_addr_t
 struct in_addr str_to_ipv4addr(const char* addrxport){
@@ -14,10 +15,10 @@ struct in_addr str_to_ipv4addr(const char* addrxport){
     }else{
         strcpy(tmpv,addrxport);
     }
-    struct sockaddr_in tmpsck;
+    struct in_addr tmpsck;
     memset(&tmpsck,0,sizeof(tmpsck));
-    inet_pton(AF_INET,tmpv,&tmpsck);
-    return tmpsck.sin_addr;
+    if(inet_pton(AF_INET,tmpv,&tmpsck) != 1) abort();
+    return tmpsck;
 }
 
 // not opened yet.
